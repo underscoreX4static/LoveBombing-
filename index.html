@@ -225,12 +225,8 @@
         <div class="avatar"><span>💌</span></div>
         <p class="final-line">It's a date, bro 🥹💍</p>
         <div class="final-slot" id="finalSlot">—</div>
-        <p class="sub" style="margin-top:16px">Tap below so I actually know when to show up looking cute 😎💐</p>
-        <div class="send-row">
-          <button class="btn btn-send btn-wide" id="sendMail">Send it to me 💌</button>
-          <button class="btn btn-wa btn-wide" id="sendWa" style="display:none">Send on WhatsApp 💚</button>
-        </div>
-        <p class="tiny" id="copyNote"></p>
+        <p class="sub" style="margin-top:16px">I'll be there looking cute, promise 😎💐<br>See you then, my wife 💕</p>
+        <p class="tiny" id="status"></p>
         <button class="back" id="backCal">← change the slot</button>
       </section>
 
@@ -243,8 +239,11 @@
    ========================================================= */
 const CONFIG = {
   herName: "Shiho",
-  recipientEmail: "Drice.mkd@gmail.com", // where the answer is sent. CHANGE if you want.
-  recipientPhone: "",            // e.g. "61412345678" (country code, no +). Empty = hide WhatsApp button.
+  // The answer is emailed to you AUTOMATICALLY (she does nothing).
+  // 30s setup, no account: go to https://web3forms.com, type Drice.mkd@gmail.com,
+  // copy the "Access Key" they give you and paste it below 👇
+  web3formsKey: "",   // <-- PASTE YOUR WEB3FORMS ACCESS KEY HERE
+  recipientEmail: "Drice.mkd@gmail.com", // where Web3Forms delivers it (the email you registered)
   daysAhead: 14,
   slotGroups: [
     { label: "☀️ Morning",   times: ["09:30", "11:00"] },
@@ -396,7 +395,7 @@ function validate(){document.getElementById('toFinal').disabled=!(state.dateObj&
 
 document.getElementById('toFinal').addEventListener('click',()=>{
   document.getElementById('finalSlot').textContent=prettySlot();
-  persist();prepareSend();go('step4');
+  persist();autoSend();go('step4');
   burst(90);setTimeout(()=>burst(70),500);setTimeout(()=>burst(60),1100);
 });
 document.getElementById('backCal').addEventListener('click',()=>go('step3'));
@@ -405,16 +404,29 @@ document.getElementById('backCal').addEventListener('click',()=>go('step3'));
 function prettySlot(){const d=state.dateObj;return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()} · ${state.time}`;}
 function persist(){try{localStorage.setItem('yumismi_answer',JSON.stringify({missedYou:true,wantsToBeWife:true,slot:prettySlot(),savedAt:new Date().toISOString()}));}catch(e){}}
 function buildMessage(){return `Brooo 💌\nDid you miss me? → YES\nWanna be my wife? → YES\nOur last date before the 88 days: ${prettySlot()}\n— ${CONFIG.herName} 💖`;}
-function prepareSend(){
-  const msg=buildMessage();
-  const subject=encodeURIComponent('Brooo 💍 — she said yes');
-  const body=encodeURIComponent(msg);
-  document.getElementById('sendMail').onclick=()=>{window.location.href=`mailto:${CONFIG.recipientEmail}?subject=${subject}&body=${body}`;};
-  const wa=document.getElementById('sendWa');
-  if(CONFIG.recipientPhone){wa.style.display='';wa.onclick=()=>window.open(`https://wa.me/${CONFIG.recipientPhone}?text=${encodeURIComponent(msg)}`,'_blank');}
-  const note=document.getElementById('copyNote');
-  note.innerHTML='Or copy it: <a href="#" id="copyLink" style="color:var(--hot);font-weight:800">tap to copy 💕</a>';
-  document.getElementById('copyLink').onclick=e=>{e.preventDefault();navigator.clipboard?.writeText(msg).then(()=>{note.innerHTML='Copied! Paste it to me anywhere 💕';});};
+
+// Fire-and-forget: emails you automatically the second she locks the date in.
+let sentOnce=false;
+function autoSend(){
+  const status=document.getElementById('status');
+  if(!CONFIG.web3formsKey){return;}            // no key yet -> stays silent (still saved locally)
+  if(status)status.textContent='sending… 💌';
+  fetch('https://api.web3forms.com/submit',{
+    method:'POST',
+    headers:{'Content-Type':'application/json',Accept:'application/json'},
+    body:JSON.stringify({
+      access_key:CONFIG.web3formsKey,
+      subject:'Brooo 💍 — she said yes',
+      from_name:CONFIG.herName,
+      'Did you miss me':'YES',
+      'Wanna be my wife':'YES',
+      'Last date before the 88 days':prettySlot(),
+      message:buildMessage()
+    })
+  }).then(r=>r.json()).then(d=>{
+    sentOnce=!!d.success;
+    if(status)status.textContent=d.success?'':'';
+  }).catch(()=>{});
 }
 </script>
 </body>
