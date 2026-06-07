@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Yumismi 💍</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink:#ff7eb3;
+    --pink-2:#ff5c9d;
+    --hot:#ff2e93;
+    --purple:#b388ff;
+    --gold:#ffd56b;
+    --ink:#5a2a47;
+    --radius:30px;
+    --shadow:0 22px 60px rgba(255,46,147,.32);
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:'Quicksand',-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:var(--ink);
+    overflow-x:hidden;
+    min-height:100dvh;
+    display:flex;align-items:center;justify-content:center;padding:22px;
+    background:linear-gradient(-45deg,#ffd0e8,#ffe0f0,#f3d9ff,#ffe9c7,#ffd6ec);
+    background-size:400% 400%;
+    animation:flow 16s ease infinite;
+  }
+  @keyframes flow{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+
+  /* floating hearts + sparkles */
+  .deco{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+  .deco span{position:absolute;bottom:-50px;animation:rise linear infinite;will-change:transform}
+  @keyframes rise{
+    0%{transform:translateY(0) rotate(0) scale(1);opacity:0}
+    10%{opacity:.7}
+    90%{opacity:.7}
+    100%{transform:translateY(-118vh) rotate(420deg) scale(1.1);opacity:0}
+  }
+  /* twinkle stars */
+  .twinkle{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .twinkle i{position:absolute;color:#fff;font-size:14px;animation:tw 2.4s ease-in-out infinite;text-shadow:0 0 8px #ffd56b}
+  @keyframes tw{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:1;transform:scale(1.25)}}
+
+  .stage{position:relative;z-index:2;width:100%;max-width:470px}
+
+  .card{
+    position:relative;
+    background:rgba(255,255,255,.72);
+    backdrop-filter:blur(20px) saturate(1.4);
+    -webkit-backdrop-filter:blur(20px) saturate(1.4);
+    border:2px solid rgba(255,255,255,.95);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow),0 0 0 6px rgba(255,255,255,.35);
+    padding:38px 26px 34px;
+    text-align:center;
+    overflow:hidden;
+  }
+  /* glossy shine sweep */
+  .card:before{
+    content:"";position:absolute;top:-60%;left:-30%;width:60%;height:220%;
+    background:linear-gradient(120deg,transparent,rgba(255,255,255,.55),transparent);
+    transform:rotate(18deg);animation:sheen 7s ease-in-out infinite;pointer-events:none;
+  }
+  @keyframes sheen{0%,70%{left:-40%}100%{left:140%}}
+  /* sparkle border bow */
+  .bow{font-size:40px;position:absolute;top:-14px;left:50%;transform:translateX(-50%);filter:drop-shadow(0 6px 8px rgba(255,46,147,.3));animation:bowb 3s ease-in-out infinite}
+  @keyframes bowb{0%,100%{transform:translateX(-50%) rotate(-6deg)}50%{transform:translateX(-50%) rotate(6deg)}}
+
+  .step{display:none}
+  .step.active{display:block;animation:pop .55s cubic-bezier(.18,.89,.32,1.4)}
+  @keyframes pop{from{opacity:0;transform:translateY(22px) scale(.94)}to{opacity:1;transform:none}}
+
+  .logo{
+    font-family:'Pacifico',cursive;
+    font-size:clamp(46px,15vw,72px);
+    line-height:1;margin:14px 0 2px;
+    background:linear-gradient(90deg,var(--hot),var(--purple),var(--pink-2));
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:shine 4s linear infinite;
+    filter:drop-shadow(0 4px 10px rgba(255,46,147,.25));
+  }
+  @keyframes shine{to{background-position:200% center}}
+  .logo small{display:block;font-family:'Quicksand';font-size:12px;font-weight:700;letter-spacing:5px;color:#d36fae;margin-top:12px;text-transform:uppercase;-webkit-text-fill-color:#d36fae}
+
+  .question{font-size:clamp(24px,7vw,32px);font-weight:700;margin:20px 0 4px}
+  .sub{font-size:15px;color:#9a6e88;margin:0 0 26px;line-height:1.55;font-weight:600}
+
+  .bubble{
+    position:relative;background:linear-gradient(135deg,#fff,#fff0f8);
+    border-radius:24px;padding:24px 22px;margin:0 auto 26px;
+    font-size:18px;line-height:1.55;font-weight:700;max-width:380px;
+    box-shadow:0 14px 36px rgba(179,136,255,.28);
+    animation:wobble 4s ease-in-out infinite;
+  }
+  @keyframes wobble{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1deg)}}
+  .bubble:after{content:"";position:absolute;left:42px;bottom:-15px;border:10px solid transparent;border-top-color:#fff0f8}
+  .avatar{
+    width:96px;height:96px;border-radius:50%;margin:0 auto 16px;
+    display:flex;align-items:center;justify-content:center;font-size:48px;
+    background:conic-gradient(from 0deg,var(--pink),var(--purple),var(--gold),var(--hot),var(--pink));
+    box-shadow:0 12px 28px rgba(179,136,255,.45);
+    animation:spinGlow 6s linear infinite, bob 3s ease-in-out infinite;
+  }
+  @keyframes spinGlow{to{transform:rotate(360deg)}}
+  .avatar span{animation:spinGlow 6s linear infinite reverse}
+  @keyframes bob{0%,100%{margin-top:0}50%{margin-top:-6px}}
+
+  .btns{display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;position:relative;min-height:70px}
+
+  .btn{
+    border:0;cursor:pointer;font-weight:800;font-size:18px;font-family:inherit;
+    padding:16px 36px;border-radius:999px;color:#fff;
+    transition:transform .15s ease,box-shadow .2s ease;
+  }
+  .btn:active{transform:scale(.94)}
+  .btn-yes{
+    background:linear-gradient(135deg,var(--hot),var(--pink),var(--gold));
+    background-size:200% auto;
+    box-shadow:0 12px 26px rgba(255,46,147,.5);
+    animation:shine 3s linear infinite, heartbeat 1.6s ease-in-out infinite;
+  }
+  @keyframes heartbeat{0%,100%{transform:scale(1)}10%{transform:scale(1.08)}20%{transform:scale(1)}30%{transform:scale(1.05)}}
+  .btn-yes:hover{transform:translateY(-3px) scale(1.06);box-shadow:0 18px 34px rgba(255,46,147,.65)}
+  .btn-no{background:linear-gradient(135deg,#d4c9dd,#bdb0cf);box-shadow:0 8px 18px rgba(120,110,140,.3);position:relative}
+
+  .cal-title{font-size:24px;font-weight:800;margin:6px 0 2px}
+  .cal-hint{font-size:14px;color:#9a6e88;margin:0 0 18px;font-weight:600}
+  .days{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+  .days::-webkit-scrollbar{height:6px}
+  .days::-webkit-scrollbar-thumb{background:#f5b8d8;border-radius:10px}
+  .day{flex:0 0 auto;scroll-snap-align:start;min-width:68px;padding:12px 8px;border-radius:20px;cursor:pointer;background:#fff;border:2px solid transparent;box-shadow:0 6px 16px rgba(255,46,147,.15);transition:transform .15s,border-color .15s}
+  .day:hover{transform:translateY(-3px) rotate(-2deg)}
+  .day.sel{border-color:var(--hot);background:#fff0f8;transform:translateY(-2px) scale(1.05)}
+  .day .dow{font-size:12px;color:#c06fa0;font-weight:800;text-transform:uppercase}
+  .day .dnum{font-size:23px;font-weight:800;line-height:1.1}
+  .day .dmon{font-size:11px;color:#b88ca8}
+
+  .slots{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  .slot{border:2px solid #ffd1e8;background:#fff;border-radius:16px;padding:12px 8px;cursor:pointer;font-family:inherit;text-align:center;transition:transform .12s,border-color .12s,background .12s}
+  .slot:hover{transform:translateY(-2px) scale(1.03)}
+  .slot.sel{border-color:var(--hot);background:linear-gradient(135deg,#fff,#ffe6f3)}
+  .slot .t{font-size:17px;font-weight:800}
+  .slot .l{font-size:11px;color:var(--hot);font-weight:800;margin-top:2px}
+
+  .continue{margin-top:22px}
+  .btn-wide{width:100%}
+  .btn[disabled]{opacity:.45;cursor:not-allowed;filter:grayscale(.4);animation:none}
+
+  .final-line{font-family:'Pacifico',cursive;font-size:26px;margin:8px 0 4px;color:var(--hot)}
+  .final-slot{display:inline-block;margin:10px 0 4px;padding:14px 22px;border-radius:18px;background:linear-gradient(135deg,#fff,#ffe6f3);font-weight:800;font-size:18px;box-shadow:0 10px 24px rgba(255,46,147,.25)}
+  .send-row{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+  .btn-send{background:linear-gradient(135deg,var(--hot),var(--purple));box-shadow:0 12px 26px rgba(179,136,255,.45);animation:none}
+  .btn-wa{background:linear-gradient(135deg,#25d366,#128c7e);box-shadow:0 12px 26px rgba(18,140,126,.4);animation:none}
+  .tiny{font-size:12px;color:#b88ca8;margin-top:14px;line-height:1.5;font-weight:600}
+
+  .taunt{position:absolute;bottom:-30px;left:0;right:0;font-size:14px;color:#d36fae;font-weight:800;opacity:0;transition:opacity .3s}
+  .taunt.show{opacity:1}
+  .back{background:none;border:0;color:#c06fa0;font-weight:800;font-size:14px;cursor:pointer;margin-top:18px;font-family:inherit}
+
+  /* confetti / heart burst layer */
+  #burst{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+  .conf{position:absolute;font-size:22px;will-change:transform,opacity;animation:fall var(--d) ease-in forwards}
+  @keyframes fall{
+    0%{transform:translate(0,0) rotate(0);opacity:1}
+    100%{transform:translate(var(--x),110vh) rotate(var(--r));opacity:0}
+  }
+  .pulse{animation:pulseAround 1.2s ease-out forwards}
+  @keyframes pulseAround{0%{transform:scale(1)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+  <div class="deco" id="deco"></div>
+  <div class="twinkle" id="twinkle"></div>
+  <div id="burst"></div>
+
+  <div class="stage">
+    <div class="card">
+      <div class="bow">🎀</div>
+
+      <!-- STEP 1 -->
+      <section class="step active" id="step1">
+        <h1 class="logo">Yumismi<small>a tiny little question</small></h1>
+        <p class="question">Did you miss me? 🥺</p>
+        <p class="sub">Don't lie, the website will know 👀✨</p>
+        <div class="btns" id="btns1">
+          <button class="btn btn-yes" data-next>Yes 💕</button>
+          <button class="btn btn-no" data-no>No</button>
+          <div class="taunt" id="taunt1"></div>
+        </div>
+      </section>
+
+      <!-- STEP 2 -->
+      <section class="step" id="step2">
+        <div class="avatar"><span>💍</span></div>
+        <div class="bubble">OMG good news!! 🥹 So you changed your mind and you want to become my wife, my girl?? 💖👰</div>
+        <div class="btns" id="btns2">
+          <button class="btn btn-yes" data-next>Yes!! 💘</button>
+          <button class="btn btn-no" data-no>No</button>
+          <div class="taunt" id="taunt2"></div>
+        </div>
+      </section>
+
+      <!-- STEP 3 -->
+      <section class="step" id="step3">
+        <h2 class="cal-title">Our last date 💕📆</h2>
+        <p class="cal-hint">Before I fly off for my 88 days. Every single slot is open — they're all reserved <b>for my wife</b> 💍</p>
+        <div class="days" id="days"></div>
+        <div class="slots" id="slots"></div>
+        <div class="continue">
+          <button class="btn btn-yes btn-wide" id="toFinal" disabled>Lock it in 🔒💞</button>
+        </div>
+      </section>
+
+      <!-- STEP 4 -->
+      <section class="step" id="step4">
+        <div class="avatar"><span>💌</span></div>
+        <p class="final-line">It's a date! 🥰</p>
+        <div class="final-slot" id="finalSlot">—</div>
+        <p class="sub" style="margin-top:16px">Tap below so I actually know when to show up looking cute 😎💐</p>
+        <div class="send-row">
+          <button class="btn btn-send btn-wide" id="sendMail">Send it to me 💌</button>
+          <button class="btn btn-wa btn-wide" id="sendWa" style="display:none">Send on WhatsApp 💚</button>
+        </div>
+        <p class="tiny" id="copyNote"></p>
+        <button class="back" id="backCal">← change the slot</button>
+      </section>
+
+    </div>
+  </div>
+
+<script>
+/* =========================================================
+   CONFIG — the only thing you need to edit
+   ========================================================= */
+const CONFIG = {
+  herName: "Yumi",
+  recipientEmail: "s2mbhcgcn4@privaterelay.appleid.com", // where the answer is sent. CHANGE if you want.
+  recipientPhone: "",            // e.g. "61412345678" (country code, no +). Empty = hide WhatsApp button.
+  daysAhead: 14,
+  slots: ["12:30", "16:00", "18:30", "20:30"],
+  slotLabel: "for my wife"
+};
+
+/* ---------- background hearts ---------- */
+(function(){
+  const c=document.getElementById('deco');
+  const e=['💖','💗','💕','💞','🌸','💘','✨','🎀','💝','🦋','🌷'];
+  for(let i=0;i<28;i++){
+    const s=document.createElement('span');
+    s.textContent=e[Math.floor(Math.random()*e.length)];
+    s.style.left=Math.random()*100+'vw';
+    s.style.fontSize=(16+Math.random()*30)+'px';
+    s.style.animationDuration=(7+Math.random()*10)+'s';
+    s.style.animationDelay=(-Math.random()*14)+'s';
+    s.style.filter='drop-shadow(0 4px 6px rgba(255,46,147,.25))';
+    c.appendChild(s);
+  }
+  const t=document.getElementById('twinkle');
+  for(let i=0;i<26;i++){
+    const st=document.createElement('i');
+    st.textContent='✦';
+    st.style.left=Math.random()*100+'vw';
+    st.style.top=Math.random()*100+'vh';
+    st.style.fontSize=(8+Math.random()*12)+'px';
+    st.style.animationDelay=(-Math.random()*2.4)+'s';
+    t.appendChild(st);
+  }
+})();
+
+/* ---------- confetti / heart burst ---------- */
+function burst(n){
+  const layer=document.getElementById('burst');
+  const e=['💖','💕','✨','🎀','💗','🌸','💞','⭐','💘','🦋'];
+  for(let i=0;i<(n||40);i++){
+    const c=document.createElement('div');
+    c.className='conf';
+    c.textContent=e[Math.floor(Math.random()*e.length)];
+    c.style.left=(20+Math.random()*60)+'vw';
+    c.style.top=(-10-Math.random()*20)+'vh';
+    c.style.fontSize=(16+Math.random()*22)+'px';
+    c.style.setProperty('--x',(Math.random()*220-110)+'px');
+    c.style.setProperty('--r',(Math.random()*720-360)+'deg');
+    c.style.setProperty('--d',(1.6+Math.random()*1.6)+'s');
+    layer.appendChild(c);
+    setTimeout(()=>c.remove(),3400);
+  }
+}
+
+/* ---------- state & navigation ---------- */
+const state={miss:null,wife:null,dateObj:null,time:null};
+function go(id){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- runaway "No" (mouse + touch), Yes grows ---------- */
+const taunts=["No? 😏","Nice try 💅","Wrong button 😘","Can't catch me 🏃‍♀️💨","Nope 😌","You meant Yes 💕","Keep dreaming 😜","Stop it 🤭","Almost! …not 😂","The No is shy 🙈"];
+function makeUncatchable(noBtn,tauntEl,yesBtn){
+  let n=0;
+  const flee=(e)=>{
+    if(e)e.preventDefault();
+    n++;
+    const card=noBtn.closest('.card').getBoundingClientRect();
+    const b=noBtn.getBoundingClientRect();
+    const maxX=Math.max(40,card.width-b.width-26);
+    const maxY=Math.max(40,card.height-b.height-26);
+    const x=Math.random()*maxX-maxX/2;
+    const y=Math.random()*maxY*0.6-maxY*0.3;
+    noBtn.style.position='relative';
+    noBtn.style.transition='transform .18s cubic-bezier(.34,1.56,.64,1)';
+    noBtn.style.transform=`translate(${x}px,${y}px) scale(${Math.max(.45,1-n*0.07)}) rotate(${Math.random()*40-20}deg)`;
+    tauntEl.textContent=taunts[n%taunts.length];
+    tauntEl.classList.add('show');
+    if(yesBtn){yesBtn.style.transition='transform .25s cubic-bezier(.34,1.56,.64,1)';yesBtn.style.transform=`scale(${Math.min(1.6,1+n*0.08)})`;}
+  };
+  ['mouseenter','mouseover','touchstart','pointerdown'].forEach(ev=>noBtn.addEventListener(ev,flee,{passive:false}));
+  noBtn.addEventListener('click',e=>{e.preventDefault();flee();});
+}
+
+function wireYesNo(btnsId,tauntId,onYes){
+  const wrap=document.getElementById(btnsId);
+  const yes=wrap.querySelector('[data-next]');
+  yes.addEventListener('click',()=>{burst(50);onYes();});
+  makeUncatchable(wrap.querySelector('[data-no]'),document.getElementById(tauntId),yes);
+}
+wireYesNo('btns1','taunt1',()=>{state.miss=true;setTimeout(()=>go('step2'),250);});
+wireYesNo('btns2','taunt2',()=>{state.wife=true;buildCalendar();setTimeout(()=>go('step3'),250);});
+
+/* ---------- calendar ---------- */
+const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function buildCalendar(){
+  const days=document.getElementById('days');
+  if(days.childElementCount)return;
+  const today=new Date();
+  for(let i=0;i<CONFIG.daysAhead;i++){
+    const d=new Date(today);d.setDate(today.getDate()+i);
+    const el=document.createElement('div');
+    el.className='day';
+    el.innerHTML=`<div class="dow">${i===0?'Today':DOW[d.getDay()]}</div><div class="dnum">${d.getDate()}</div><div class="dmon">${MON[d.getMonth()]}</div>`;
+    el.addEventListener('click',()=>selectDay(el,d));
+    days.appendChild(el);
+  }
+}
+function selectDay(el,d){
+  document.querySelectorAll('.day').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel');
+  state.dateObj=d;state.time=null;
+  renderSlots();validate();
+}
+function renderSlots(){
+  const slots=document.getElementById('slots');
+  slots.innerHTML='';
+  CONFIG.slots.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='slot';
+    b.innerHTML=`<div class="t">${t}</div><div class="l">💍 ${CONFIG.slotLabel}</div>`;
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.slot').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');state.time=t;validate();burst(16);
+    });
+    slots.appendChild(b);
+  });
+}
+function validate(){document.getElementById('toFinal').disabled=!(state.dateObj&&state.time);}
+
+document.getElementById('toFinal').addEventListener('click',()=>{
+  document.getElementById('finalSlot').textContent=prettySlot();
+  persist();prepareSend();go('step4');
+  burst(90);setTimeout(()=>burst(70),500);setTimeout(()=>burst(60),1100);
+});
+document.getElementById('backCal').addEventListener('click',()=>go('step3'));
+
+/* ---------- output helpers ---------- */
+function prettySlot(){const d=state.dateObj;return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()} · ${state.time}`;}
+function persist(){try{localStorage.setItem('yumismi_answer',JSON.stringify({missedYou:true,wantsToBeWife:true,slot:prettySlot(),savedAt:new Date().toISOString()}));}catch(e){}}
+function buildMessage(){return `Yumismi 💌\nDid you miss me? → YES\nBecome my wife? → YES\nOur last date before the 88 days: ${prettySlot()}\n— ${CONFIG.herName} 💖`;}
+function prepareSend(){
+  const msg=buildMessage();
+  const subject=encodeURIComponent('Yumismi 💍 — she said yes');
+  const body=encodeURIComponent(msg);
+  document.getElementById('sendMail').onclick=()=>{window.location.href=`mailto:${CONFIG.recipientEmail}?subject=${subject}&body=${body}`;};
+  const wa=document.getElementById('sendWa');
+  if(CONFIG.recipientPhone){wa.style.display='';wa.onclick=()=>window.open(`https://wa.me/${CONFIG.recipientPhone}?text=${encodeURIComponent(msg)}`,'_blank');}
+  const note=document.getElementById('copyNote');
+  note.innerHTML='Or copy it: <a href="#" id="copyLink" style="color:var(--hot);font-weight:800">tap to copy 💕</a>';
+  document.getElementById('copyLink').onclick=e=>{e.preventDefault();navigator.clipboard?.writeText(msg).then(()=>{note.innerHTML='Copied! Paste it to me anywhere 💕';});};
+}
+</script>
+</body>
+</html>
