@@ -166,6 +166,34 @@
   .taunt.show{opacity:1}
   .back{background:none;border:0;color:#c06fa0;font-weight:800;font-size:14px;cursor:pointer;margin-top:18px;font-family:inherit}
 
+  /* ---- surprise reveal ---- */
+  .surprise{position:relative;margin-top:26px;padding:26px 18px 22px;border-radius:24px;overflow:hidden;
+    background:linear-gradient(135deg,#fff7fb,#fbf0ff);
+    box-shadow:0 16px 40px rgba(255,46,147,.22);
+    opacity:0;transform:scale(.8) translateY(22px);pointer-events:none}
+  .surprise.show{animation:unlockPop .75s cubic-bezier(.18,.89,.32,1.5) forwards;pointer-events:auto}
+  @keyframes unlockPop{to{opacity:1;transform:none}}
+  /* shimmering gold ring */
+  .surprise:before{content:"";position:absolute;inset:0;border-radius:24px;padding:2px;
+    background:linear-gradient(120deg,var(--gold),var(--hot),var(--purple),var(--gold));
+    background-size:300% 300%;animation:shine 4s linear infinite;
+    -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+  .surprise-glow{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(circle at 50% 0%,rgba(255,213,107,.55),transparent 62%);
+    animation:glowPulse 2.6s ease-in-out infinite}
+  @keyframes glowPulse{0%,100%{opacity:.45}50%{opacity:1}}
+  .gift{font-size:62px;position:relative;animation:giftBounce 1.5s ease-in-out infinite;filter:drop-shadow(0 8px 12px rgba(255,46,147,.35))}
+  @keyframes giftBounce{0%,100%{transform:translateY(0) rotate(-5deg)}25%{transform:translateY(-9px) rotate(5deg)}50%{transform:translateY(0) rotate(-5deg)}75%{transform:translateY(-4px) rotate(3deg)}}
+  .unlock-badge{display:inline-block;position:relative;margin:8px 0;padding:6px 16px;border-radius:999px;
+    font-weight:800;font-size:13px;letter-spacing:.5px;color:#9a5b00;
+    background:linear-gradient(135deg,#ffe9a8,#ffd56b);box-shadow:0 6px 16px rgba(255,180,40,.45);
+    animation:badgeShine 2s ease-in-out infinite}
+  @keyframes badgeShine{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+  .surprise-text{position:relative;font-size:15px;line-height:1.55;font-weight:700;color:#6a3a55;margin:6px 4px 18px}
+  .btn-surprise{position:relative;background:linear-gradient(135deg,var(--gold),var(--hot),var(--purple));background-size:200% auto;
+    box-shadow:0 12px 26px rgba(255,46,147,.45);animation:shine 3s linear infinite,heartbeat 1.8s ease-in-out infinite}
+
   /* confetti / heart burst layer */
   #burst{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
   .conf{position:absolute;font-size:22px;will-change:transform,opacity;animation:fall var(--d) ease-in forwards}
@@ -226,6 +254,16 @@
         <p class="final-line">It's a date, bro 🥹💍</p>
         <div class="final-slot" id="finalSlot">—</div>
         <p class="sub" style="margin-top:16px">I'll be there looking cute, promise 😎💐<br>See you then, my wife 💕</p>
+
+        <div class="surprise" id="surprise">
+          <div class="surprise-glow"></div>
+          <div class="gift">🎁</div>
+          <div class="unlock-badge">✨ You unlocked a surprise ✨</div>
+          <p class="surprise-text">88 days apart… so I made you <b>88 reasons</b> to fall for me 💘<br>A brand new one waiting every single day.</p>
+          <button class="btn btn-surprise btn-wide" id="openSurprise">Open my surprise 🎁</button>
+          <p class="tiny" id="surpriseNote"></p>
+        </div>
+
         <p class="tiny" id="status"></p>
         <button class="back" id="backCal">← change the slot</button>
       </section>
@@ -252,7 +290,10 @@ const CONFIG = {
     { label: "🌤️ Afternoon", times: ["13:30", "16:00"] },
     { label: "🌙 Evening",   times: ["18:30", "20:30"] }
   ],
-  slotLabel: "for my wife"
+  slotLabel: "for my wife",
+  // The "88 reasons" advent calendar. Leave empty for now -> button shows a teaser.
+  // Paste the calendar link here when it's ready and the button will redirect to it.
+  surpriseUrl: ""
 };
 
 /* ---------- background hearts ---------- */
@@ -399,8 +440,18 @@ document.getElementById('toFinal').addEventListener('click',()=>{
   document.getElementById('finalSlot').textContent=prettySlot();
   persist();autoSend();go('step4');
   burst(90);setTimeout(()=>burst(70),500);setTimeout(()=>burst(60),1100);
+  // replay + delay the "surprise unlocked" reveal
+  const sp=document.getElementById('surprise');
+  sp.classList.remove('show'); void sp.offsetWidth;
+  setTimeout(()=>{sp.classList.add('show');burst(70);setTimeout(()=>burst(50),450);},1500);
 });
 document.getElementById('backCal').addEventListener('click',()=>go('step3'));
+
+document.getElementById('openSurprise').addEventListener('click',()=>{
+  burst(45);
+  if(CONFIG.surpriseUrl){window.location.href=CONFIG.surpriseUrl;return;}
+  document.getElementById('surpriseNote').textContent='coming very soon, my love 💌 — day 1 drops the moment I leave 🥹';
+});
 
 /* ---------- output helpers ---------- */
 function prettySlot(){const d=state.dateObj;return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()} · ${state.time}`;}
