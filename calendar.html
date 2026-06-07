@@ -188,10 +188,8 @@ const CONFIG = {
   herName: "Shiho",
   total: 88,
   startDate: "2026-06-08",   // demo fallback; the real one lives in Supabase app_config
-  dailyLimit: 4,             // demo fallback; the real one lives in Supabase app_config
-  // optional instant ping to your Telegram when she replies to a question card:
-  telegramToken:  "8863873914:AAEZHFQBd5xb_au11F277R6rU9uBiwG89qM",
-  telegramChatId: "8734644816"
+  dailyLimit: 4              // demo fallback; the real one lives in Supabase app_config
+  // (Telegram pings now go through the Supabase "notify" Edge Function — no token here)
 };
 
 const ENTRIES = window.CAL_ENTRIES || {};
@@ -425,11 +423,12 @@ async function sendReply(n){
   if(!txt){note.textContent='write something first 🙂';return;}
   note.textContent='sending… 💌';
   try{ await Store.saveReply(n,txt); }catch(e){}
-  // optional instant Telegram ping
-  if(CONFIG.telegramToken&&CONFIG.telegramChatId){
-    fetch(`https://api.telegram.org/bot${CONFIG.telegramToken}/sendMessage`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({chat_id:CONFIG.telegramChatId,text:`💌 ${CONFIG.herName} answered Day ${n}:\n"${txt}"`,disable_web_page_preview:true})
+  // instant ping to your Telegram, server-side (token stays in the Edge Function)
+  if(SB_ON){
+    fetch(`${window.SB.url}/functions/v1/notify`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':window.SB.anon,'Authorization':`Bearer ${window.SB.anon}`},
+      body:JSON.stringify({kind:'reply',name:CONFIG.herName,day:n,text:txt})
     }).catch(()=>{});
   }
   note.textContent='sent 💌';

@@ -271,19 +271,16 @@
     </div>
   </div>
 
+<script src="supabase-config.js"></script>
 <script>
 /* =========================================================
    CONFIG — the only thing you need to edit
    ========================================================= */
 const CONFIG = {
   herName: "Shiho",
-  // Her answer is sent to YOUR Telegram automatically (instant phone notif, she does nothing).
-  // Setup (2 min):
-  //   1) In Telegram, message @BotFather -> /newbot -> follow prompts -> copy the TOKEN
-  //   2) Message @userinfobot -> it replies with your numeric Id -> that's your CHAT ID
-  //   3) Open your new bot once and tap "Start" so it's allowed to message you
-  telegramToken:  "8863873914:AAEZHFQBd5xb_au11F277R6rU9uBiwG89qM",
-  telegramChatId: "8734644816",
+  // Her answer is sent to YOUR Telegram automatically via the Supabase
+  // "notify" Edge Function (the bot token stays server-side, never here).
+  // Just fill supabase-config.js with your project URL + anon key.
   daysAhead: 14,
   slotGroups: [
     { label: "☀️ Morning",   times: ["09:30", "11:00"] },
@@ -464,24 +461,18 @@ function prettySlot(){const d=state.dateObj;return `${DOW[d.getDay()]} ${d.getDa
 function persist(){try{localStorage.setItem('yumismi_answer',JSON.stringify({missedYou:true,wantsToBeWife:true,slot:prettySlot(),savedAt:new Date().toISOString()}));}catch(e){}}
 function buildMessage(){return `Brooo 💌\nDid you miss me? → YES\nWanna be my wife? → YES\nOur last date before the 88 days: ${prettySlot()}\n— ${CONFIG.herName} 💖`;}
 
-// Fire-and-forget: pings your Telegram the second she locks the date in.
-let sentOnce=false;
+// Fire-and-forget: pings your Telegram (server-side) the second she locks in.
 function autoSend(){
   const status=document.getElementById('status');
-  if(!CONFIG.telegramToken||!CONFIG.telegramChatId){return;}  // not set yet -> silent (still saved locally)
+  const SB=window.SB;
+  if(!SB||!SB.url||!SB.anon){return;}   // backend not set up yet -> silent (still saved locally)
   if(status)status.textContent='sending… 💌';
-  fetch(`https://api.telegram.org/bot${CONFIG.telegramToken}/sendMessage`,{
+  fetch(`${SB.url}/functions/v1/notify`,{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      chat_id:CONFIG.telegramChatId,
-      text:buildMessage(),
-      disable_web_page_preview:true
-    })
-  }).then(r=>r.json()).then(d=>{
-    sentOnce=!!d.ok;
-    if(status)status.textContent='';
-  }).catch(()=>{if(status)status.textContent='';});
+    headers:{'Content-Type':'application/json','apikey':SB.anon,'Authorization':`Bearer ${SB.anon}`},
+    body:JSON.stringify({kind:'date',name:CONFIG.herName,slot:prettySlot()})
+  }).then(r=>r.json()).then(()=>{if(status)status.textContent='';})
+   .catch(()=>{if(status)status.textContent='';});
 }
 </script>
 </body>
