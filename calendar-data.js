@@ -1,7 +1,9 @@
 /* =======================================================================
-   88-DAY CALENDAR — CONTENT FILE
-   This is the ONLY file you edit to add content. The engine (calendar.html)
-   never needs to change.
+   88-DAY CALENDAR — DEMO / PREVIEW CONTENT ONLY
+   ⚠️ Once Supabase is configured, the REAL content lives in the database
+   and you manage it from admin.html. This file is only used as sample
+   content in local DEMO mode (when supabase-config.js has no keys), so you
+   can preview the look & feel. Same field names as the admin form.
 
    • Add a day whenever you want, in any order.
    • Any day you leave out shows a gentle "coming soon" placeholder, so the

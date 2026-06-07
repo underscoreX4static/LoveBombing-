@@ -16,6 +16,9 @@
   .card{background:#fff;border-radius:18px;box-shadow:0 10px 30px rgba(179,136,255,.18);padding:20px;margin-bottom:16px}
   input{width:100%;padding:12px 14px;border:2px solid #e8def5;border-radius:12px;font-family:inherit;font-size:15px;margin:6px 0}
   input:focus{outline:none;border-color:var(--hot)}
+  textarea{width:100%;min-height:72px;padding:12px 14px;border:2px solid #e8def5;border-radius:12px;font-family:inherit;font-size:15px;margin:6px 0;resize:vertical}
+  textarea:focus{outline:none;border-color:var(--hot)}
+  select{width:100%;padding:12px 14px;border:2px solid #e8def5;border-radius:12px;font-family:inherit;font-size:15px;margin:6px 0;background:#fff}
   .btn{border:0;cursor:pointer;font-weight:800;font-size:15px;font-family:inherit;padding:12px 22px;border-radius:99px;color:#fff;
     background:linear-gradient(135deg,var(--hot),var(--purple))}
   .btn.sm{padding:8px 16px;font-size:13px}
@@ -69,6 +72,36 @@
     </div>
 
     <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <strong id="cardsTitle">Cards</strong>
+        <button class="btn sm" id="newCard">+ Add card</button>
+      </div>
+      <p class="usub" style="margin:8px 0 4px">Fill these ahead of the daily drip so she never hits an empty day. Last position = the finale.</p>
+      <div id="cardList"></div>
+      <div id="editor" class="hidden" style="margin-top:14px;border-top:1px solid #f0e8f7;padding-top:14px">
+        <div class="usub" id="editorTitle">New card</div>
+        <select id="eCat">
+          <option value="music">🎵 Music</option><option value="youtube">📺 Watch</option>
+          <option value="photo">📸 Postcard</option><option value="quote">💬 Words</option>
+          <option value="joke">😂 Joke</option><option value="inside">🤙 Us</option>
+          <option value="question">❓ Question</option><option value="coupon">🎟️ Coupon</option>
+          <option value="note" selected>💌 Note</option><option value="finale">💍 Finale</option>
+        </select>
+        <input id="eReason" placeholder="the cocky one-liner — Reason #N you'll fall for me…">
+        <textarea id="eBody" placeholder="text (HTML and line breaks ok)"></textarea>
+        <input id="eSpotify" placeholder="Spotify link (optional)">
+        <input id="eYoutube" placeholder="YouTube link (optional)">
+        <input id="eImage" placeholder="image URL (optional)">
+        <label class="usub" style="display:block;margin:8px 0"><input type="checkbox" id="eAsk" style="width:auto;margin-right:8px"> ask her a question (show a reply box)</label>
+        <div class="row">
+          <button class="btn sm" id="saveCard">Save card</button>
+          <button class="btn sm" id="cancelCard" style="background:#c9bdd6">Cancel</button>
+          <span class="note" id="cardNote"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
       <strong id="usersTitle">People</strong>
       <div id="users"></div>
     </div>
@@ -100,6 +133,7 @@ async function load(){
   if(!isAdmin){document.getElementById('loginNote').textContent='this account is not an admin. (run the admin SQL line for your email)';return;}
   document.getElementById('login').classList.add('hidden');
   document.getElementById('dash').classList.remove('hidden');
+  await loadCards();
 
   const {data:cfg}=await sb.from('app_config').select('*').eq('id',1).single();
   if(cfg){TOTAL=cfg.total;document.getElementById('cStart').value=cfg.start_date;document.getElementById('cPeek').value=cfg.peek_ahead;}
@@ -146,11 +180,72 @@ async function saveCfg(){
   if(error)note.classList.add('err');
 }
 
+/* ---------- cards CRUD ---------- */
+let editingId=null;
+async function loadCards(){
+  const {data:cards}=await sb.from('cards').select('*').order('position');
+  const box=document.getElementById('cardList');box.innerHTML='';
+  document.getElementById('cardsTitle').textContent=`Cards (${(cards||[]).length})`;
+  if(!cards||!cards.length)box.innerHTML='<p class="usub">no cards yet — add your first 💌</p>';
+  (cards||[]).forEach(c=>{
+    const div=document.createElement('div');div.className='u';
+    div.innerHTML=`<div style="min-width:170px"><div class="uname">#${c.position} · ${esc(c.category)}</div>
+      <div class="usub">${esc((c.reason||'').slice(0,64))||'(no reason)'}</div></div>
+      <div class="row"><button class="btn sm eBtn">edit</button><button class="btn sm dBtn" style="background:#e23a6e">del</button></div>`;
+    div.querySelector('.eBtn').onclick=()=>openEditor(c);
+    div.querySelector('.dBtn').onclick=()=>delCard(c);
+    box.appendChild(div);
+  });
+}
+function openEditor(c){
+  editingId=c?c.id:null;
+  document.getElementById('editor').classList.remove('hidden');
+  document.getElementById('editorTitle').textContent=c?`Edit card #${c.position}`:'New card';
+  document.getElementById('eCat').value=c?c.category:'note';
+  document.getElementById('eReason').value=c?(c.reason||''):'';
+  document.getElementById('eBody').value=c?(c.body||''):'';
+  document.getElementById('eSpotify').value=c?(c.spotify||''):'';
+  document.getElementById('eYoutube').value=c?(c.youtube||''):'';
+  document.getElementById('eImage').value=c?(c.image||''):'';
+  document.getElementById('eAsk').checked=c?!!c.ask:false;
+  document.getElementById('cardNote').textContent='';
+  document.getElementById('editor').scrollIntoView({behavior:'smooth'});
+}
+async function saveCard(){
+  const note=document.getElementById('cardNote');note.className='note';
+  const val=id=>document.getElementById(id).value.trim();
+  const payload={category:document.getElementById('eCat').value,reason:val('eReason'),
+    body:document.getElementById('eBody').value,
+    spotify:val('eSpotify')||null,youtube:val('eYoutube')||null,image:val('eImage')||null,
+    ask:document.getElementById('eAsk').checked};
+  let error;
+  if(editingId){({error}=await sb.from('cards').update(payload).eq('id',editingId));}
+  else{
+    const {data:mx}=await sb.from('cards').select('position').order('position',{ascending:false}).limit(1);
+    const pos=((mx&&mx[0])?mx[0].position:0)+1;
+    ({error}=await sb.from('cards').insert({...payload,position:pos}));
+  }
+  if(error){note.classList.add('err');note.textContent=error.message;return;}
+  document.getElementById('editor').classList.add('hidden');editingId=null;
+  await loadCards();
+}
+async function delCard(c){
+  if(!confirm(`Delete card #${c.position} (${c.category})?`))return;
+  await sb.from('cards').delete().eq('id',c.id);
+  // recompact positions so there are no gaps
+  const {data:rest}=await sb.from('cards').select('id,position').order('position');
+  let i=1;for(const r of (rest||[])){if(r.position!==i)await sb.from('cards').update({position:i}).eq('id',r.id);i++;}
+  await loadCards();
+}
+
 if(!SB_ON){document.getElementById('cfgMissing').classList.remove('hidden');}
 else{
   document.getElementById('loginBtn').onclick=login;
   document.getElementById('logout').onclick=async()=>{await sb.auth.signOut();location.reload();};
   document.getElementById('saveCfg').onclick=saveCfg;
+  document.getElementById('newCard').onclick=()=>openEditor(null);
+  document.getElementById('saveCard').onclick=saveCard;
+  document.getElementById('cancelCard').onclick=()=>{document.getElementById('editor').classList.add('hidden');editingId=null;};
   sb.auth.getSession().then(({data:{session}})=>{if(session)load();});
 }
 </script>

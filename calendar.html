@@ -188,7 +188,7 @@ const CONFIG = {
   herName: "Shiho",
   total: 88,
   startDate: "2026-06-08",   // demo fallback; the real one lives in Supabase app_config
-  peekAhead: 3,
+  dailyLimit: 4,             // demo fallback; the real one lives in Supabase app_config
   // optional instant ping to your Telegram when she replies to a question card:
   telegramToken:  "8863873914:AAEZHFQBd5xb_au11F277R6rU9uBiwG89qM",
   telegramChatId: "8734644816"
@@ -204,8 +204,8 @@ const CATS = {
 const CHEATS = ["hop hop hop — arrête de tricher 😏","nice try… patience, my love 🙅‍♀️",
   "that one's not ready for you yet 👀","brooo no peeking 😤💕","slow down, greedy 😋 come back later"];
 
-/* runtime config resolved at init */
-let RT = { start:null, total:CONFIG.total, peek:CONFIG.peekAhead };
+/* runtime config (demo uses these; with Supabase the server is authoritative) */
+let RT = { start:null, total:CONFIG.total };
 const SB_ON = !!(window.SB && window.SB.url && window.SB.anon);
 let sb = SB_ON ? supabase.createClient(window.SB.url, window.SB.anon) : null;
 
@@ -239,27 +239,47 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 /* =========================================================
    STORE — swappable backend (Supabase) / local demo
    ========================================================= */
+// state() -> {available, opened:[{d,c}], used_today, total, daily_limit}
+// openCard(day) -> {allowed, reason, card?}
 const SupaStore = {
-  async opened(){const {data}=await sb.from('opens').select('day');return (data||[]).map(r=>r.day);},
-  async tryOpen(day){
+  async state(){
+    const {data,error}=await sb.rpc('calendar_state');
+    if(error||!data||data.error)return {available:0,opened:[],used_today:0,total:CONFIG.total,daily_limit:CONFIG.dailyLimit};
+    return data;
+  },
+  async openCard(day){
     const {data,error}=await sb.rpc('open_day',{p_day:day});
     if(error)return {allowed:false,reason:'error'};
-    return data;  // {allowed,reason,current}
+    return data;
   },
   async saveReply(day,text){
     const u=(await sb.auth.getUser()).data.user;
     await sb.from('replies').insert({user_id:u.id,day,body:text});
   }
 };
+// ----- demo (no backend): content from calendar-data.js, state in localStorage -----
+function demoFilled(){let n=0;while(ENTRIES[n+1])n++;return n;}                 // contiguous from 1
+function demoOpened(){try{return JSON.parse(localStorage.getItem('cal_opened')||'[]');}catch(e){return [];}}
+function demoToday(){try{const t=JSON.parse(localStorage.getItem('cal_today')||'{}');return t.date===new Date().toDateString()?(t.n||0):0;}catch(e){return 0;}}
+function demoBump(){localStorage.setItem('cal_today',JSON.stringify({date:new Date().toDateString(),n:demoToday()+1}));}
+function demoAvail(){return Math.max(0,Math.min(RT.total,Math.min(currentUnlocked(),demoFilled())));}
 const LocalStore = {
-  async opened(){try{return JSON.parse(localStorage.getItem('cal_opened')||'[]');}catch(e){return [];}},
-  async tryOpen(day){
-    const cur=currentUnlocked();
+  async state(){
+    return {available:demoAvail(),
+      opened:demoOpened().map(d=>({d,c:(ENTRIES[d]&&ENTRIES[d].category)||'note'})),
+      used_today:demoToday(), total:RT.total, daily_limit:CONFIG.dailyLimit};
+  },
+  async openCard(day){
+    const avail=demoAvail();
     if(day<1||day>RT.total)return {allowed:false,reason:'range'};
-    if(day===RT.total&&cur<RT.total)return {allowed:false,reason:'finale'};
-    if(day>Math.max(cur,0)+RT.peek)return {allowed:false,reason:'cheat'};
-    const o=await this.opened();if(!o.includes(day)){o.push(day);try{localStorage.setItem('cal_opened',JSON.stringify(o));}catch(e){}}
-    return {allowed:true,reason:'ok',current:cur};
+    if(day===RT.total&&currentUnlocked()<RT.total)return {allowed:false,reason:'finale'};
+    if(day>avail)return {allowed:false,reason:'locked'};
+    const opened=demoOpened();
+    if(!opened.includes(day)){
+      if(demoToday()>=CONFIG.dailyLimit)return {allowed:false,reason:'limit'};
+      opened.push(day);try{localStorage.setItem('cal_opened',JSON.stringify(opened));}catch(e){}demoBump();
+    }
+    return {allowed:true,reason:'ok',card:ENTRIES[day]||{category:'note',reason:`Reason #${day}`,body:'…'}};
   },
   async saveReply(){/* demo: nothing persisted */}
 };
@@ -306,9 +326,6 @@ async function doAuth(){
 async function afterAuth(){
   const {data:{session}}=await sb.auth.getSession();
   if(!session){showGate();return;}
-  // load config + profile
-  const {data:cfg}=await sb.from('app_config').select('*').eq('id',1).single();
-  if(cfg){RT.start=parseDate(cfg.start_date);RT.total=cfg.total;RT.peek=cfg.peek_ahead;}
   const {data:prof}=await sb.from('profiles').select('username').eq('id',session.user.id).single();
   const name=(prof&&prof.username)||'you';
   document.getElementById('hi').innerHTML=`hi ${name} 💕 &nbsp;·&nbsp; <a id="logout">log out</a>`;
@@ -321,39 +338,33 @@ async function afterAuth(){
 /* =========================================================
    GRID
    ========================================================= */
-function entryFor(n){
-  return ENTRIES[n] || { category:"note", reason:`Reason #${n} you'll fall for me 😏`,
-    body:"Still cooking this one up… 🍳 come back soon 💕" };
-}
+let STATE={available:0,opened:[],used_today:0,total:CONFIG.total,daily_limit:CONFIG.dailyLimit};
 async function build(){
+  STATE=await Store.state();
+  const total=STATE.total||CONFIG.total;RT.total=total;
+  const avail=STATE.available||0;
+  const openedMap={};(STATE.opened||[]).forEach(o=>{openedMap[o.d]=o.c||'note';});
+  const openedDays=Object.keys(openedMap).map(Number);
   const grid=document.getElementById('grid');grid.innerHTML='';
-  const opened=await Store.opened();
-  const cur=currentUnlocked();
-  for(let n=1;n<=RT.total;n++){
-    const cat=(ENTRIES[n]&&ENTRIES[n].category)||(n===RT.total?'finale':'note');
-    const isOpened=opened.includes(n);
-    const unlocked=n<=cur;
-    const peekable=!unlocked && n<=Math.max(cur,0)+RT.peek && !(n===RT.total);
+  for(let n=1;n<=total;n++){
     const t=document.createElement('button');t.className='tile';t.dataset.day=n;
-    if(isOpened){
-      t.classList.add('open');if(cat==='finale')t.classList.add('finale');t.classList.add('opened');
+    if(openedMap[n]!==undefined){
+      const cat=openedMap[n];t.classList.add('open','opened');if(cat==='finale')t.classList.add('finale');
       t.innerHTML=`<span class="done">✓</span><span class="ic">${(CATS[cat]||{e:'🎁'}).e}</span><span class="num">${n}</span>`;
-    }else if(unlocked){
-      t.classList.add('open');if(cat==='finale')t.classList.add('finale');
-      if(n===cur)t.classList.add('fresh');
-      t.innerHTML=`<span class="ic">${(CATS[cat]||{e:'🎁'}).e}</span><span class="num">${n}</span>`;
-    }else if(peekable){
-      t.classList.add('peek');t.innerHTML=`<span class="ic">👀</span><span class="num">${n}</span>`;
+    }else if(n<=avail){
+      t.classList.add('open','fresh');                       // unopened & available -> mystery box, glowing
+      t.innerHTML=`<span class="ic">🎁</span><span class="num">${n}</span>`;
     }else{
       t.classList.add('locked');t.innerHTML=`<span class="ic">🔒</span><span class="num">${n}</span>`;
     }
     t.addEventListener('click',()=>openDay(n,t));
     grid.appendChild(t);
   }
-  const pct=Math.round(opened.length/RT.total*100);
-  document.getElementById('bar').style.width=pct+'%';
-  document.getElementById('pcount').textContent =
-    cur<=0 ? `starts ${fmt(RT.start)} 💌` : `${opened.length} / ${RT.total} opened · day ${cur}`;
+  const left=Math.max(0,(STATE.daily_limit||0)-(STATE.used_today||0));
+  const toOpen=Math.max(0,avail-openedDays.length);
+  document.getElementById('bar').style.width=Math.round(openedDays.length/total*100)+'%';
+  document.getElementById('pcount').textContent=
+    `${openedDays.length} / ${total} opened` + (toOpen?` · 🎁 ${toOpen} to open`:'') + ` · ${left} left today`;
 }
 
 /* ---------- media ---------- */
@@ -370,43 +381,37 @@ function youtubeEmbed(url){
 }
 
 /* ---------- open a day ---------- */
+const LIMIT_MSGS=["that's your "+'%n'+" for today 😏 come back tomorrow 💕","easy tiger 🐯 no more today — see you tomorrow 💕","you've had your fill for today 😋 patience, my love 💕"];
 async function openDay(n,tile){
-  const res=await Store.tryOpen(n);
+  const res=await Store.openCard(n);
   if(!res.allowed){
-    if(res.reason==='cheat')toast(CHEATS[Math.floor(Math.random()*CHEATS.length)]);
-    else if(res.reason==='finale')toast('💍 patience… the finale only opens on day '+RT.total);
+    if(res.reason==='limit')toast(LIMIT_MSGS[Math.floor(Math.random()*LIMIT_MSGS.length)].replace('%n',(STATE.daily_limit||4)+' cards'));
+    else if(res.reason==='finale')toast('💍 the last one only opens on the final day');
+    else if(res.reason==='locked')toast(CHEATS[Math.floor(Math.random()*CHEATS.length)]);
     else if(res.reason==='auth')showGate();
-    else toast(`🔒 unlocks ${fmt(unlockDate(n))}`);
+    else toast('hmm, try again in a sec 💕');
     return;
   }
-  const e=entryFor(n);const cat=e.category||'note';const meta=CATS[cat]||{e:'🎁',l:'Surprise'};
-  document.getElementById('daytag').textContent=`Day ${n} · ${fmt(unlockDate(n))}`;
+  const c=res.card||{};const cat=c.category||'note';const meta=CATS[cat]||{e:'🎁',l:'Surprise'};
+  document.getElementById('daytag').textContent=`Day ${n}`;
   document.getElementById('catlabel').textContent=`${meta.e} ${meta.l}`;
-  document.getElementById('mReason').innerHTML=e.reason||'';
-  document.getElementById('mBody').innerHTML=(e.body||'').replace(/\n/g,'<br>');
+  document.getElementById('mReason').innerHTML=c.reason||'';
+  document.getElementById('mBody').innerHTML=(c.body||'').replace(/\n/g,'<br>');
   let media='';
-  if(e.spotify)media=spotifyEmbed(e.spotify);
-  else if(e.youtube)media=youtubeEmbed(e.youtube);
-  else if(e.image)media=`<img src="${e.image}" alt="day ${n}" loading="lazy">`;
+  if(c.spotify)media=spotifyEmbed(c.spotify);
+  else if(c.youtube)media=youtubeEmbed(c.youtube);
+  else if(c.image)media=`<img src="${c.image}" alt="day ${n}" loading="lazy">`;
   document.getElementById('mMedia').innerHTML=media;
 
   const reply=document.getElementById('mReply');
-  if(e.ask){reply.style.display='';document.getElementById('replyText').value='';
+  if(c.ask){reply.style.display='';document.getElementById('replyText').value='';
     document.getElementById('replyNote').textContent='';
     document.getElementById('replySend').onclick=()=>sendReply(n);}
   else reply.style.display='none';
 
   document.getElementById('modal').classList.add('show');
   burst(cat==='finale'?90:40);
-
-  // reflect opened state on the tile
-  if(tile){tile.className='tile open opened';if(cat==='finale')tile.classList.add('finale');
-    tile.innerHTML=`<span class="done">✓</span><span class="ic">${meta.e}</span><span class="num">${n}</span>`;}
-  // refresh progress count
-  const opened=await Store.opened();
-  document.getElementById('bar').style.width=Math.round(opened.length/RT.total*100)+'%';
-  const cur=currentUnlocked();
-  document.getElementById('pcount').textContent=cur<=0?`starts ${fmt(RT.start)} 💌`:`${opened.length} / ${RT.total} opened · day ${cur}`;
+  build();   // resync tiles + counters
 }
 function closeModal(){document.getElementById('modal').classList.remove('show');}
 document.getElementById('close').addEventListener('click',closeModal);
@@ -443,7 +448,7 @@ async function sendReply(n){
     if(session)await afterAuth(); else showGate();
   }else{
     // DEMO mode: no backend configured yet
-    RT.start=parseDate(CONFIG.startDate);RT.total=CONFIG.total;RT.peek=CONFIG.peekAhead;
+    RT.start=parseDate(CONFIG.startDate);RT.total=CONFIG.total;
     document.getElementById('app').classList.remove('hidden');
     document.getElementById('hi').textContent='demo mode 👀';
     await build();
