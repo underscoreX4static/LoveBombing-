@@ -316,19 +316,21 @@ function makeUncatchable(noBtn,tauntEl,yesBtn){
     n++;
     const card=noBtn.closest('.card');
     const cr=card.getBoundingClientRect();
+    // offsetParent of the absolute button is .btns — convert card-space -> local
+    const pr=(noBtn.offsetParent||card).getBoundingClientRect();
+    const offX=pr.left-cr.left, offY=pr.top-cr.top;
     const bw=noBtn.offsetWidth, bh=noBtn.offsetHeight;
     const margin=14;
-    // clamp strictly inside the card so it can NEVER be clipped/hidden
+    // pick a target position expressed in CARD coordinates, fully inside it
     const maxLeft=Math.max(margin, cr.width  - bw - margin);
     const maxTop =Math.max(margin, cr.height - bh - margin);
-    const left=margin + Math.random()*(maxLeft - margin);
-    const top =margin + Math.random()*(maxTop  - margin);
+    const leftCard=margin + Math.random()*(maxLeft - margin);
+    const topCard =margin + Math.random()*(maxTop  - margin);
     noBtn.style.position='absolute';
     noBtn.style.margin='0';
-    noBtn.style.left=left+'px';
-    noBtn.style.top=top+'px';
+    noBtn.style.left=(leftCard-offX)+'px';   // back into offsetParent-local space
+    noBtn.style.top =(topCard -offY)+'px';
     noBtn.style.transition='left .18s cubic-bezier(.34,1.56,.64,1),top .18s cubic-bezier(.34,1.56,.64,1),transform .18s';
-    // keep it a comfortable size so it stays clearly visible
     noBtn.style.transform=`scale(${Math.max(.8,1-n*0.015)}) rotate(${Math.random()*30-15}deg)`;
     tauntEl.textContent=taunts[n%taunts.length];
     tauntEl.classList.add('show');
