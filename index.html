@@ -259,7 +259,7 @@
           <div class="surprise-glow"></div>
           <div class="gift">🎁</div>
           <div class="unlock-badge">✨ You unlocked a surprise ✨</div>
-          <p class="surprise-text">88 days apart… so I made you <b>88 reasons</b> to fall for me 💘<br>A brand new one waiting every single day.</p>
+          <p class="surprise-text">Something to make these 88 days feel a little shorter 😏<br>No spoilers though… you'll have to open it 🎁</p>
           <button class="btn btn-surprise btn-wide" id="openSurprise">Open my surprise 🎁</button>
           <p class="tiny" id="surpriseNote"></p>
         </div>
@@ -440,17 +440,24 @@ document.getElementById('toFinal').addEventListener('click',()=>{
   document.getElementById('finalSlot').textContent=prettySlot();
   persist();autoSend();go('step4');
   burst(90);setTimeout(()=>burst(70),500);setTimeout(()=>burst(60),1100);
-  // replay + delay the "surprise unlocked" reveal
-  const sp=document.getElementById('surprise');
-  sp.classList.remove('show'); void sp.offsetWidth;
-  setTimeout(()=>{sp.classList.add('show');burst(70);setTimeout(()=>burst(50),450);},1500);
+  revealSurprise();
 });
 document.getElementById('backCal').addEventListener('click',()=>go('step3'));
+
+// reliably replays the reveal every time she lands on the final step
+let surpriseTimer=null;
+function revealSurprise(){
+  const sp=document.getElementById('surprise');
+  document.getElementById('surpriseNote').textContent='';
+  clearTimeout(surpriseTimer);
+  sp.classList.remove('show'); void sp.offsetWidth;          // force reflow -> restart animation
+  surpriseTimer=setTimeout(()=>{sp.classList.add('show');burst(70);setTimeout(()=>burst(50),450);},1500);
+}
 
 document.getElementById('openSurprise').addEventListener('click',()=>{
   burst(45);
   if(CONFIG.surpriseUrl){window.location.href=CONFIG.surpriseUrl;return;}
-  document.getElementById('surpriseNote').textContent='coming very soon, my love 💌 — day 1 drops the moment I leave 🥹';
+  document.getElementById('surpriseNote').textContent='patience, my love 💌 — it goes live the day I fly off 🥹';
 });
 
 /* ---------- output helpers ---------- */
