@@ -144,6 +144,7 @@
   .day .dmon{font-size:11px;color:#b88ca8}
 
   .slots{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  .slot-group{grid-column:1/-1;text-align:left;font-size:13px;font-weight:800;color:#c06fa0;margin:8px 2px 0;letter-spacing:.5px}
   .slot{border:2px solid #ffd1e8;background:#fff;border-radius:16px;padding:12px 8px;cursor:pointer;font-family:inherit;text-align:center;transition:transform .12s,border-color .12s,background .12s}
   .slot:hover{transform:translateY(-2px) scale(1.03)}
   .slot.sel{border-color:var(--hot);background:linear-gradient(135deg,#fff,#ffe6f3)}
@@ -245,7 +246,11 @@ const CONFIG = {
   recipientEmail: "Drice.mkd@gmail.com", // where the answer is sent. CHANGE if you want.
   recipientPhone: "",            // e.g. "61412345678" (country code, no +). Empty = hide WhatsApp button.
   daysAhead: 14,
-  slots: ["12:30", "16:00", "18:30", "20:30"],
+  slotGroups: [
+    { label: "☀️ Morning",   times: ["09:30", "11:00"] },
+    { label: "🌤️ Afternoon", times: ["13:30", "16:00"] },
+    { label: "🌙 Evening",   times: ["18:30", "20:30"] }
+  ],
   slotLabel: "for my wife"
 };
 
@@ -309,18 +314,25 @@ function makeUncatchable(noBtn,tauntEl,yesBtn){
   const flee=(e)=>{
     if(e)e.preventDefault();
     n++;
-    const card=noBtn.closest('.card').getBoundingClientRect();
-    const b=noBtn.getBoundingClientRect();
-    const maxX=Math.max(40,card.width-b.width-26);
-    const maxY=Math.max(40,card.height-b.height-26);
-    const x=Math.random()*maxX-maxX/2;
-    const y=Math.random()*maxY*0.6-maxY*0.3;
-    noBtn.style.position='relative';
-    noBtn.style.transition='transform .18s cubic-bezier(.34,1.56,.64,1)';
-    noBtn.style.transform=`translate(${x}px,${y}px) scale(${Math.max(.45,1-n*0.07)}) rotate(${Math.random()*40-20}deg)`;
+    const card=noBtn.closest('.card');
+    const cr=card.getBoundingClientRect();
+    const bw=noBtn.offsetWidth, bh=noBtn.offsetHeight;
+    const margin=14;
+    // clamp strictly inside the card so it can NEVER be clipped/hidden
+    const maxLeft=Math.max(margin, cr.width  - bw - margin);
+    const maxTop =Math.max(margin, cr.height - bh - margin);
+    const left=margin + Math.random()*(maxLeft - margin);
+    const top =margin + Math.random()*(maxTop  - margin);
+    noBtn.style.position='absolute';
+    noBtn.style.margin='0';
+    noBtn.style.left=left+'px';
+    noBtn.style.top=top+'px';
+    noBtn.style.transition='left .18s cubic-bezier(.34,1.56,.64,1),top .18s cubic-bezier(.34,1.56,.64,1),transform .18s';
+    // keep it a comfortable size so it stays clearly visible
+    noBtn.style.transform=`scale(${Math.max(.8,1-n*0.015)}) rotate(${Math.random()*30-15}deg)`;
     tauntEl.textContent=taunts[n%taunts.length];
     tauntEl.classList.add('show');
-    if(yesBtn){yesBtn.style.transition='transform .25s cubic-bezier(.34,1.56,.64,1)';yesBtn.style.transform=`scale(${Math.min(1.6,1+n*0.08)})`;}
+    if(yesBtn){yesBtn.style.transition='transform .25s cubic-bezier(.34,1.56,.64,1)';yesBtn.style.transform=`scale(${Math.min(1.5,1+n*0.06)})`;}
   };
   ['mouseenter','mouseover','touchstart','pointerdown'].forEach(ev=>noBtn.addEventListener(ev,flee,{passive:false}));
   noBtn.addEventListener('click',e=>{e.preventDefault();flee();});
@@ -361,15 +373,21 @@ function selectDay(el,d){
 function renderSlots(){
   const slots=document.getElementById('slots');
   slots.innerHTML='';
-  CONFIG.slots.forEach(t=>{
-    const b=document.createElement('button');
-    b.className='slot';
-    b.innerHTML=`<div class="t">${t}</div><div class="l">💍 ${CONFIG.slotLabel}</div>`;
-    b.addEventListener('click',()=>{
-      document.querySelectorAll('.slot').forEach(x=>x.classList.remove('sel'));
-      b.classList.add('sel');state.time=t;validate();burst(16);
+  CONFIG.slotGroups.forEach(g=>{
+    const head=document.createElement('div');
+    head.className='slot-group';
+    head.textContent=g.label;
+    slots.appendChild(head);
+    g.times.forEach(t=>{
+      const b=document.createElement('button');
+      b.className='slot';
+      b.innerHTML=`<div class="t">${t}</div><div class="l">💍 ${CONFIG.slotLabel}</div>`;
+      b.addEventListener('click',()=>{
+        document.querySelectorAll('.slot').forEach(x=>x.classList.remove('sel'));
+        b.classList.add('sel');state.time=t;validate();burst(16);
+      });
+      slots.appendChild(b);
     });
-    slots.appendChild(b);
   });
 }
 function validate(){document.getElementById('toFinal').disabled=!(state.dateObj&&state.time);}
