@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>88 days 💌</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink:#ff7eb3;--pink-2:#ff5c9d;--hot:#ff2e93;--purple:#b388ff;--gold:#ffd56b;
+    --ink:#5a2a47;--radius:24px;--shadow:0 18px 50px rgba(255,46,147,.3);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    margin:0;font-family:'Quicksand',-apple-system,BlinkMacSystemFont,sans-serif;color:var(--ink);
+    min-height:100dvh;overflow-x:hidden;padding:22px 16px 60px;
+    background:linear-gradient(-45deg,#ffd0e8,#ffe0f0,#f3d9ff,#ffe9c7,#ffd6ec);
+    background-size:400% 400%;animation:flow 18s ease infinite;
+  }
+  @keyframes flow{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+
+  .deco{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+  .deco span{position:absolute;bottom:-50px;animation:rise linear infinite}
+  @keyframes rise{0%{transform:translateY(0) rotate(0);opacity:0}10%{opacity:.6}90%{opacity:.6}100%{transform:translateY(-118vh) rotate(420deg);opacity:0}}
+
+  .wrap{position:relative;z-index:1;max-width:680px;margin:0 auto}
+  header{text-align:center;margin-bottom:18px}
+  h1{font-family:'Pacifico',cursive;font-size:clamp(34px,9vw,52px);margin:6px 0 2px;
+    background:linear-gradient(90deg,var(--hot),var(--purple),var(--pink-2));background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 4s linear infinite}
+  @keyframes shine{to{background-position:200% center}}
+  .tagline{font-size:14px;font-weight:700;color:#9a6e88;margin:0 0 14px}
+
+  .progress{max-width:360px;margin:0 auto 6px;height:12px;border-radius:99px;background:rgba(255,255,255,.7);
+    box-shadow:inset 0 2px 5px rgba(255,46,147,.15);overflow:hidden}
+  .progress>i{display:block;height:100%;width:0;border-radius:99px;
+    background:linear-gradient(90deg,var(--gold),var(--hot),var(--purple));transition:width .8s cubic-bezier(.18,.89,.32,1.2)}
+  .pcount{font-size:13px;font-weight:800;color:#c06fa0;margin-bottom:18px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:10px}
+  .tile{position:relative;aspect-ratio:1;border:0;border-radius:18px;cursor:pointer;font-family:inherit;
+    background:#fff;box-shadow:0 6px 16px rgba(255,46,147,.18);overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    transition:transform .15s,box-shadow .2s}
+  .tile:hover{transform:translateY(-3px) scale(1.04)}
+  .tile .num{font-size:18px;font-weight:800;line-height:1}
+  .tile .ic{font-size:20px;line-height:1}
+  /* locked */
+  .tile.locked{background:rgba(255,255,255,.5);color:#c6a9bd;cursor:not-allowed;box-shadow:none}
+  .tile.locked:hover{transform:none}
+  .tile.locked .num{font-size:13px;opacity:.7}
+  /* unlocked & unopened: glowing */
+  .tile.open{background:linear-gradient(135deg,#fff,#ffe9f4)}
+  .tile.fresh{animation:glow 1.8s ease-in-out infinite}
+  .tile.fresh:before{content:"";position:absolute;inset:0;border-radius:18px;padding:2px;
+    background:linear-gradient(120deg,var(--gold),var(--hot),var(--purple),var(--gold));background-size:300% 300%;
+    animation:shine 3s linear infinite;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+  @keyframes glow{0%,100%{box-shadow:0 6px 16px rgba(255,46,147,.25)}50%{box-shadow:0 8px 26px rgba(255,46,147,.55)}}
+  .tile.opened{opacity:.72}
+  .tile .done{position:absolute;top:4px;right:6px;font-size:11px;color:var(--hot)}
+  .tile.finale{background:linear-gradient(135deg,#fff3cf,#ffd56b)}
+
+  /* toast */
+  .toast{position:fixed;left:50%;top:18px;transform:translateX(-50%) translateY(-80px);z-index:90;
+    background:rgba(90,42,71,.92);color:#fff;padding:10px 18px;border-radius:99px;font-weight:700;font-size:14px;
+    box-shadow:0 10px 24px rgba(0,0,0,.2);opacity:0;transition:transform .35s,opacity .35s;pointer-events:none}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+  /* modal */
+  .modal{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:18px;
+    background:rgba(120,60,95,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .modal.show{display:flex;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .sheet{position:relative;width:100%;max-width:440px;max-height:88dvh;overflow-y:auto;text-align:center;
+    background:rgba(255,255,255,.92);border:2px solid #fff;border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:30px 22px 26px;animation:pop .5s cubic-bezier(.18,.89,.32,1.45)}
+  @keyframes pop{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:none}}
+  .close{position:absolute;top:12px;right:14px;border:0;background:#fff0f7;color:#c06fa0;width:34px;height:34px;
+    border-radius:50%;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 10px rgba(255,46,147,.2)}
+  .daytag{font-size:13px;font-weight:800;color:#c06fa0;letter-spacing:1px;text-transform:uppercase}
+  .catlabel{display:inline-block;margin:8px 0 6px;padding:5px 14px;border-radius:99px;font-weight:800;font-size:13px;
+    background:linear-gradient(135deg,#ffe9a8,#ffd56b);color:#9a5b00;box-shadow:0 6px 14px rgba(255,180,40,.4)}
+  .reason{font-size:clamp(20px,5.6vw,25px);font-weight:800;line-height:1.25;margin:8px 4px 14px}
+  .mbody{font-size:16px;line-height:1.6;font-weight:600;color:#5a3a4e;margin:0 2px 16px;white-space:normal}
+  .media{margin:8px 0 4px}
+  .media img{width:100%;border-radius:16px;box-shadow:0 10px 24px rgba(255,46,147,.25)}
+  .embed{width:100%;border:0;border-radius:14px}
+  .ytwrap{position:relative;padding-top:56.25%;border-radius:14px;overflow:hidden;box-shadow:0 10px 24px rgba(255,46,147,.25)}
+  .ytwrap .embed{position:absolute;inset:0;width:100%;height:100%}
+
+  .reply{margin-top:16px;text-align:left}
+  .reply textarea{width:100%;min-height:80px;border:2px solid #ffd1e8;border-radius:14px;padding:12px;
+    font-family:inherit;font-size:15px;resize:vertical;color:var(--ink)}
+  .reply textarea:focus{outline:none;border-color:var(--hot)}
+
+  .btn{border:0;cursor:pointer;font-weight:800;font-size:17px;font-family:inherit;padding:14px 26px;border-radius:99px;
+    color:#fff;transition:transform .15s,box-shadow .2s}
+  .btn:active{transform:scale(.95)}
+  .btn-wide{width:100%;margin-top:10px}
+  .btn-go{background:linear-gradient(135deg,var(--gold),var(--hot),var(--purple));background-size:200% auto;
+    box-shadow:0 10px 24px rgba(255,46,147,.45);animation:shine 3s linear infinite}
+  .tiny{font-size:12px;color:#b88ca8;margin-top:10px;font-weight:600;text-align:center}
+
+  .pvbanner{position:fixed;bottom:0;left:0;right:0;z-index:70;background:rgba(90,42,71,.92);color:#fff;
+    text-align:center;font-size:12px;font-weight:700;padding:7px}
+
+  #burst{position:fixed;inset:0;pointer-events:none;z-index:95;overflow:hidden}
+  .conf{position:absolute;will-change:transform,opacity;animation:fall var(--d) ease-in forwards}
+  @keyframes fall{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--x),110vh) rotate(var(--r));opacity:0}}
+</style>
+</head>
+<body>
+  <div class="deco" id="deco"></div>
+  <div id="burst"></div>
+  <div class="toast" id="toast"></div>
+
+  <div class="wrap">
+    <header>
+      <h1>88 days</h1>
+      <p class="tagline">a little something for you, every day 💌</p>
+      <div class="progress"><i id="bar"></i></div>
+      <div class="pcount" id="pcount">—</div>
+    </header>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- modal -->
+  <div class="modal" id="modal">
+    <div class="sheet" id="sheet">
+      <button class="close" id="close">✕</button>
+      <div class="daytag" id="daytag"></div>
+      <div class="catlabel" id="catlabel"></div>
+      <h2 class="reason" id="mReason"></h2>
+      <div class="mbody" id="mBody"></div>
+      <div class="media" id="mMedia"></div>
+      <div class="reply" id="mReply" style="display:none">
+        <textarea id="replyText" placeholder="type your answer to me…"></textarea>
+        <button class="btn btn-go btn-wide" id="replySend">Send it to me 💌</button>
+        <p class="tiny" id="replyNote"></p>
+      </div>
+    </div>
+  </div>
+
+<script src="calendar-data.js"></script>
+<script>
+/* =========================================================
+   CONFIG
+   ========================================================= */
+const CONFIG = {
+  herName: "Shiho",
+  total: 88,
+  startDate: "2026-06-08",   // DAY 1 unlocks on this date (your departure). Change if it shifts.
+  // Telegram (her replies to "question" days are sent here):
+  telegramToken:  "8863873914:AAEZHFQBd5xb_au11F277R6rU9uBiwG89qM",
+  telegramChatId: "8734644816"
+};
+
+const ENTRIES = window.CAL_ENTRIES || {};
+const CATS = {
+  music:{e:"🎵",l:"Music"}, youtube:{e:"📺",l:"Watch"}, photo:{e:"📸",l:"Postcard"},
+  quote:{e:"💬",l:"Words"}, joke:{e:"😂",l:"Joke"}, inside:{e:"🤙",l:"Us"},
+  question:{e:"❓",l:"For you"}, coupon:{e:"🎟️",l:"Coupon"}, note:{e:"💌",l:"Note"},
+  finale:{e:"💍",l:"Day 88"}
+};
+const PREVIEW = /[?&](preview|all)\b/.test(location.search);
+
+/* ---------- dates ---------- */
+function parseDate(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+const START = parseDate(CONFIG.startDate);
+function midnight(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
+function unlockDate(n){const d=new Date(START);d.setDate(START.getDate()+(n-1));return d;}
+function fmt(d){return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});}
+const diffDays = Math.floor((midnight(new Date())-START)/86400000)+1;
+const UNLOCKED = PREVIEW ? CONFIG.total : Math.max(0, Math.min(CONFIG.total, diffDays));
+
+/* ---------- opened state ---------- */
+function getOpened(){try{return JSON.parse(localStorage.getItem('cal_opened')||'[]');}catch(e){return [];}}
+function markOpened(n){const o=getOpened();if(!o.includes(n)){o.push(n);try{localStorage.setItem('cal_opened',JSON.stringify(o));}catch(e){}}}
+
+/* ---------- background hearts ---------- */
+(function(){const c=document.getElementById('deco');const e=['💖','💗','💕','✨','🎀','🦋','💝'];
+  for(let i=0;i<20;i++){const s=document.createElement('span');s.textContent=e[Math.floor(Math.random()*e.length)];
+    s.style.left=Math.random()*100+'vw';s.style.fontSize=(14+Math.random()*26)+'px';
+    s.style.animationDuration=(8+Math.random()*10)+'s';s.style.animationDelay=(-Math.random()*14)+'s';c.appendChild(s);}})();
+
+/* ---------- confetti ---------- */
+function burst(n){const layer=document.getElementById('burst');const e=['💖','💕','✨','🎀','💗','🌸','⭐'];
+  for(let i=0;i<(n||40);i++){const c=document.createElement('div');c.className='conf';
+    c.textContent=e[Math.floor(Math.random()*e.length)];c.style.left=(20+Math.random()*60)+'vw';
+    c.style.top=(-10-Math.random()*15)+'vh';c.style.fontSize=(16+Math.random()*20)+'px';
+    c.style.setProperty('--x',(Math.random()*220-110)+'px');c.style.setProperty('--r',(Math.random()*720-360)+'deg');
+    c.style.setProperty('--d',(1.6+Math.random()*1.4)+'s');layer.appendChild(c);setTimeout(()=>c.remove(),3200);}}
+
+/* ---------- toast ---------- */
+let toastT=null;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
+
+/* ---------- build grid ---------- */
+function entryFor(n){
+  return ENTRIES[n] || { category:"note", reason:`Reason #${n} you'll fall for me 😏`,
+    body:"Still cooking this one up… 🍳 come back soon 💕" };
+}
+function build(){
+  const grid=document.getElementById('grid');const opened=getOpened();
+  for(let n=1;n<=CONFIG.total;n++){
+    const unlocked = n<=UNLOCKED;
+    const cat = (ENTRIES[n]&&ENTRIES[n].category)||(n===CONFIG.total?'finale':'note');
+    const t=document.createElement('button');
+    t.className='tile';
+    if(!unlocked){t.classList.add('locked');t.innerHTML=`<span class="ic">🔒</span><span class="num">${n}</span>`;}
+    else{
+      t.classList.add('open');
+      if(cat==='finale')t.classList.add('finale');
+      if(opened.includes(n))t.classList.add('opened');
+      else if(n===UNLOCKED && !PREVIEW)t.classList.add('fresh');     // newest unopened glows
+      const ic=(CATS[cat]||{e:'🎁'}).e;
+      t.innerHTML=`${opened.includes(n)?'<span class="done">✓</span>':''}<span class="ic">${ic}</span><span class="num">${n}</span>`;
+    }
+    t.addEventListener('click',()=>{
+      if(!unlocked){toast(`🔒 unlocks ${fmt(unlockDate(n))}`);return;}
+      openDay(n,t);
+    });
+    grid.appendChild(t);
+  }
+  const pct=Math.round(UNLOCKED/CONFIG.total*100);
+  document.getElementById('bar').style.width=pct+'%';
+  document.getElementById('pcount').textContent =
+    UNLOCKED<=0 ? `starts ${fmt(START)} 💌` : `Day ${UNLOCKED} / ${CONFIG.total}`;
+}
+
+/* ---------- media embeds ---------- */
+function spotifyEmbed(url){
+  let m=url.match(/spotify\.com\/(track|album|playlist|episode|show)\/([A-Za-z0-9]+)/)
+        || url.match(/spotify:(track|album|playlist|episode|show):([A-Za-z0-9]+)/);
+  if(!m)return '';
+  return `<iframe class="embed" style="height:152px" src="https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator" allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture" loading="lazy"></iframe>`;
+}
+function youtubeEmbed(url){
+  const m=String(url).match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
+  const id=m?m[1]:String(url).trim();
+  return `<div class="ytwrap"><iframe class="embed" src="https://www.youtube.com/embed/${id}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`;
+}
+
+/* ---------- open a day ---------- */
+function openDay(n,tile){
+  const e=entryFor(n);const cat=e.category||'note';const meta=CATS[cat]||{e:'🎁',l:'Surprise'};
+  document.getElementById('daytag').textContent=`Day ${n} · ${fmt(unlockDate(n))}`;
+  document.getElementById('catlabel').textContent=`${meta.e} ${meta.l}`;
+  document.getElementById('mReason').innerHTML=e.reason||'';
+  document.getElementById('mBody').innerHTML=(e.body||'').replace(/\n/g,'<br>');
+  let media='';
+  if(e.spotify)media=spotifyEmbed(e.spotify);
+  else if(e.youtube)media=youtubeEmbed(e.youtube);
+  else if(e.image)media=`<img src="${e.image}" alt="day ${n}" loading="lazy">`;
+  document.getElementById('mMedia').innerHTML=media;
+
+  const reply=document.getElementById('mReply');
+  if(e.ask){reply.style.display='';document.getElementById('replyText').value='';
+    document.getElementById('replyNote').textContent='';
+    document.getElementById('replySend').onclick=()=>sendReply(n);}
+  else reply.style.display='none';
+
+  document.getElementById('modal').classList.add('show');
+  burst(cat==='finale'?90:40);
+  if(!getOpened().includes(n)){markOpened(n);if(tile){tile.classList.remove('fresh');tile.classList.add('opened');
+    if(!tile.querySelector('.done')){const d=document.createElement('span');d.className='done';d.textContent='✓';tile.prepend(d);}}}
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+document.getElementById('close').addEventListener('click',closeModal);
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+/* ---------- her reply -> your Telegram ---------- */
+function sendReply(n){
+  const txt=document.getElementById('replyText').value.trim();
+  const note=document.getElementById('replyNote');
+  if(!txt){note.textContent='write something first 🙂';return;}
+  if(!CONFIG.telegramToken||!CONFIG.telegramChatId){note.textContent='sent 💌';return;}
+  note.textContent='sending… 💌';
+  fetch(`https://api.telegram.org/bot${CONFIG.telegramToken}/sendMessage`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({chat_id:CONFIG.telegramChatId,text:`💌 ${CONFIG.herName} answered Day ${n}:\n"${txt}"`,disable_web_page_preview:true})
+  }).then(r=>r.json()).then(d=>{note.textContent=d.ok?'sent 💌 he just got it':'sent 💌';})
+   .catch(()=>{note.textContent='sent 💌';});
+}
+
+/* ---------- go ---------- */
+build();
+if(PREVIEW){const b=document.createElement('div');b.className='pvbanner';
+  b.textContent='👀 preview mode — all days unlocked (remove ?preview to go live)';document.body.appendChild(b);}
+</script>
+</body>
+</html>
