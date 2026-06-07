@@ -33,6 +33,8 @@
     -webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 4s linear infinite}
   @keyframes shine{to{background-position:200% center}}
   .tagline{font-size:14px;font-weight:700;color:#9a6e88;margin:0 0 14px}
+  .hi{font-size:13px;font-weight:700;color:#c06fa0;margin:2px 0 12px}
+  .hi a{color:var(--hot);cursor:pointer;text-decoration:underline}
 
   .progress{max-width:360px;margin:0 auto 6px;height:12px;border-radius:99px;background:rgba(255,255,255,.7);
     box-shadow:inset 0 2px 5px rgba(255,46,147,.15);overflow:hidden}
@@ -48,11 +50,9 @@
   .tile:hover{transform:translateY(-3px) scale(1.04)}
   .tile .num{font-size:18px;font-weight:800;line-height:1}
   .tile .ic{font-size:20px;line-height:1}
-  /* locked */
-  .tile.locked{background:rgba(255,255,255,.5);color:#c6a9bd;cursor:not-allowed;box-shadow:none}
-  .tile.locked:hover{transform:none}
+  .tile.locked{background:rgba(255,255,255,.5);color:#c6a9bd;box-shadow:none}
   .tile.locked .num{font-size:13px;opacity:.7}
-  /* unlocked & unopened: glowing */
+  .tile.peek{background:rgba(255,255,255,.78)}
   .tile.open{background:linear-gradient(135deg,#fff,#ffe9f4)}
   .tile.fresh{animation:glow 1.8s ease-in-out infinite}
   .tile.fresh:before{content:"";position:absolute;inset:0;border-radius:18px;padding:2px;
@@ -64,10 +64,9 @@
   .tile .done{position:absolute;top:4px;right:6px;font-size:11px;color:var(--hot)}
   .tile.finale{background:linear-gradient(135deg,#fff3cf,#ffd56b)}
 
-  /* toast */
   .toast{position:fixed;left:50%;top:18px;transform:translateX(-50%) translateY(-80px);z-index:90;
-    background:rgba(90,42,71,.92);color:#fff;padding:10px 18px;border-radius:99px;font-weight:700;font-size:14px;
-    box-shadow:0 10px 24px rgba(0,0,0,.2);opacity:0;transition:transform .35s,opacity .35s;pointer-events:none}
+    background:rgba(90,42,71,.92);color:#fff;padding:11px 20px;border-radius:99px;font-weight:700;font-size:14px;
+    box-shadow:0 10px 24px rgba(0,0,0,.2);opacity:0;transition:transform .35s,opacity .35s;pointer-events:none;max-width:90vw;text-align:center}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
   /* modal */
@@ -76,7 +75,7 @@
   .modal.show{display:flex;animation:fade .25s ease}
   @keyframes fade{from{opacity:0}to{opacity:1}}
   .sheet{position:relative;width:100%;max-width:440px;max-height:88dvh;overflow-y:auto;text-align:center;
-    background:rgba(255,255,255,.92);border:2px solid #fff;border-radius:var(--radius);box-shadow:var(--shadow);
+    background:rgba(255,255,255,.94);border:2px solid #fff;border-radius:var(--radius);box-shadow:var(--shadow);
     padding:30px 22px 26px;animation:pop .5s cubic-bezier(.18,.89,.32,1.45)}
   @keyframes pop{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:none}}
   .close{position:absolute;top:12px;right:14px;border:0;background:#fff0f7;color:#c06fa0;width:34px;height:34px;
@@ -85,7 +84,7 @@
   .catlabel{display:inline-block;margin:8px 0 6px;padding:5px 14px;border-radius:99px;font-weight:800;font-size:13px;
     background:linear-gradient(135deg,#ffe9a8,#ffd56b);color:#9a5b00;box-shadow:0 6px 14px rgba(255,180,40,.4)}
   .reason{font-size:clamp(20px,5.6vw,25px);font-weight:800;line-height:1.25;margin:8px 4px 14px}
-  .mbody{font-size:16px;line-height:1.6;font-weight:600;color:#5a3a4e;margin:0 2px 16px;white-space:normal}
+  .mbody{font-size:16px;line-height:1.6;font-weight:600;color:#5a3a4e;margin:0 2px 16px}
   .media{margin:8px 0 4px}
   .media img{width:100%;border-radius:16px;box-shadow:0 10px 24px rgba(255,46,147,.25)}
   .embed{width:100%;border:0;border-radius:14px}
@@ -100,17 +99,34 @@
   .btn{border:0;cursor:pointer;font-weight:800;font-size:17px;font-family:inherit;padding:14px 26px;border-radius:99px;
     color:#fff;transition:transform .15s,box-shadow .2s}
   .btn:active{transform:scale(.95)}
+  .btn:disabled{opacity:.55;cursor:default}
   .btn-wide{width:100%;margin-top:10px}
   .btn-go{background:linear-gradient(135deg,var(--gold),var(--hot),var(--purple));background-size:200% auto;
     box-shadow:0 10px 24px rgba(255,46,147,.45);animation:shine 3s linear infinite}
   .tiny{font-size:12px;color:#b88ca8;margin-top:10px;font-weight:600;text-align:center}
 
-  .pvbanner{position:fixed;bottom:0;left:0;right:0;z-index:70;background:rgba(90,42,71,.92);color:#fff;
+  /* auth gate */
+  #gate{position:relative;z-index:1;max-width:400px;margin:6vh auto 0}
+  .gcard{background:rgba(255,255,255,.86);backdrop-filter:blur(16px);border:2px solid #fff;border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:30px 24px;text-align:center}
+  .gcard h2{font-family:'Pacifico',cursive;font-size:30px;margin:4px 0 2px;color:var(--hot)}
+  .gcard p.sub{font-size:14px;color:#9a6e88;font-weight:600;margin:2px 0 18px}
+  .field{display:block;width:100%;margin:8px 0;padding:13px 15px;border:2px solid #ffd1e8;border-radius:14px;
+    font-family:inherit;font-size:15px;color:var(--ink)}
+  .field:focus{outline:none;border-color:var(--hot)}
+  .switch{font-size:13px;font-weight:700;color:#9a6e88;margin-top:14px}
+  .switch a{color:var(--hot);cursor:pointer;text-decoration:underline}
+  .gnote{font-size:13px;font-weight:700;margin-top:10px;min-height:18px}
+  .gnote.err{color:#e23a6e}.gnote.ok{color:#1aa06a}
+
+  .demo-banner{position:fixed;bottom:0;left:0;right:0;z-index:70;background:rgba(90,42,71,.92);color:#fff;
     text-align:center;font-size:12px;font-weight:700;padding:7px}
 
   #burst{position:fixed;inset:0;pointer-events:none;z-index:95;overflow:hidden}
   .conf{position:absolute;will-change:transform,opacity;animation:fall var(--d) ease-in forwards}
   @keyframes fall{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--x),110vh) rotate(var(--r));opacity:0}}
+
+  .hidden{display:none!important}
 </style>
 </head>
 <body>
@@ -118,10 +134,26 @@
   <div id="burst"></div>
   <div class="toast" id="toast"></div>
 
-  <div class="wrap">
+  <!-- ===== AUTH GATE ===== -->
+  <div id="gate" class="hidden">
+    <div class="gcard">
+      <h2>88 days 💌</h2>
+      <p class="sub" id="gateSub">make your account to unlock your surprise</p>
+      <input class="field" id="fUser"  type="text" placeholder="pick a username 👤" autocomplete="username">
+      <input class="field" id="fEmail" type="email" placeholder="your email" autocomplete="email">
+      <input class="field" id="fPass"  type="password" placeholder="a password" autocomplete="current-password">
+      <button class="btn btn-go btn-wide" id="gateBtn">Create my account 💕</button>
+      <p class="gnote" id="gateNote"></p>
+      <p class="switch" id="gateSwitch">already have an account? <a id="toLogin">log in</a></p>
+    </div>
+  </div>
+
+  <!-- ===== APP ===== -->
+  <div class="wrap hidden" id="app">
     <header>
       <h1>88 days</h1>
       <p class="tagline">a little something for you, every day 💌</p>
+      <p class="hi" id="hi"></p>
       <div class="progress"><i id="bar"></i></div>
       <div class="pcount" id="pcount">—</div>
     </header>
@@ -145,16 +177,19 @@
     </div>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="calendar-data.js"></script>
 <script>
 /* =========================================================
-   CONFIG
+   CONFIG (defaults; live values come from Supabase when set)
    ========================================================= */
 const CONFIG = {
   herName: "Shiho",
   total: 88,
-  startDate: "2026-06-08",   // DAY 1 unlocks on this date (your departure). Change if it shifts.
-  // Telegram (her replies to "question" days are sent here):
+  startDate: "2026-06-08",   // demo fallback; the real one lives in Supabase app_config
+  peekAhead: 3,
+  // optional instant ping to your Telegram when she replies to a question card:
   telegramToken:  "8863873914:AAEZHFQBd5xb_au11F277R6rU9uBiwG89qM",
   telegramChatId: "8734644816"
 };
@@ -166,20 +201,23 @@ const CATS = {
   question:{e:"❓",l:"For you"}, coupon:{e:"🎟️",l:"Coupon"}, note:{e:"💌",l:"Note"},
   finale:{e:"💍",l:"Day 88"}
 };
-const PREVIEW = /[?&](preview|all)\b/.test(location.search);
+const CHEATS = ["hop hop hop — arrête de tricher 😏","nice try… patience, my love 🙅‍♀️",
+  "that one's not ready for you yet 👀","brooo no peeking 😤💕","slow down, greedy 😋 come back later"];
+
+/* runtime config resolved at init */
+let RT = { start:null, total:CONFIG.total, peek:CONFIG.peekAhead };
+const SB_ON = !!(window.SB && window.SB.url && window.SB.anon);
+let sb = SB_ON ? supabase.createClient(window.SB.url, window.SB.anon) : null;
 
 /* ---------- dates ---------- */
 function parseDate(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
-const START = parseDate(CONFIG.startDate);
 function midnight(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
-function unlockDate(n){const d=new Date(START);d.setDate(START.getDate()+(n-1));return d;}
+function unlockDate(n){const d=new Date(RT.start);d.setDate(RT.start.getDate()+(n-1));return d;}
 function fmt(d){return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});}
-const diffDays = Math.floor((midnight(new Date())-START)/86400000)+1;
-const UNLOCKED = PREVIEW ? CONFIG.total : Math.max(0, Math.min(CONFIG.total, diffDays));
-
-/* ---------- opened state ---------- */
-function getOpened(){try{return JSON.parse(localStorage.getItem('cal_opened')||'[]');}catch(e){return [];}}
-function markOpened(n){const o=getOpened();if(!o.includes(n)){o.push(n);try{localStorage.setItem('cal_opened',JSON.stringify(o));}catch(e){}}}
+function currentUnlocked(){
+  const diff=Math.floor((midnight(new Date())-RT.start)/86400000)+1;
+  return Math.max(0,Math.min(RT.total,diff));
+}
 
 /* ---------- background hearts ---------- */
 (function(){const c=document.getElementById('deco');const e=['💖','💗','💕','✨','🎀','🦋','💝'];
@@ -187,53 +225,138 @@ function markOpened(n){const o=getOpened();if(!o.includes(n)){o.push(n);try{loca
     s.style.left=Math.random()*100+'vw';s.style.fontSize=(14+Math.random()*26)+'px';
     s.style.animationDuration=(8+Math.random()*10)+'s';s.style.animationDelay=(-Math.random()*14)+'s';c.appendChild(s);}})();
 
-/* ---------- confetti ---------- */
+/* ---------- confetti / toast ---------- */
 function burst(n){const layer=document.getElementById('burst');const e=['💖','💕','✨','🎀','💗','🌸','⭐'];
   for(let i=0;i<(n||40);i++){const c=document.createElement('div');c.className='conf';
     c.textContent=e[Math.floor(Math.random()*e.length)];c.style.left=(20+Math.random()*60)+'vw';
     c.style.top=(-10-Math.random()*15)+'vh';c.style.fontSize=(16+Math.random()*20)+'px';
     c.style.setProperty('--x',(Math.random()*220-110)+'px');c.style.setProperty('--r',(Math.random()*720-360)+'deg');
     c.style.setProperty('--d',(1.6+Math.random()*1.4)+'s');layer.appendChild(c);setTimeout(()=>c.remove(),3200);}}
-
-/* ---------- toast ---------- */
 let toastT=null;
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800);}
 
-/* ---------- build grid ---------- */
+/* =========================================================
+   STORE — swappable backend (Supabase) / local demo
+   ========================================================= */
+const SupaStore = {
+  async opened(){const {data}=await sb.from('opens').select('day');return (data||[]).map(r=>r.day);},
+  async tryOpen(day){
+    const {data,error}=await sb.rpc('open_day',{p_day:day});
+    if(error)return {allowed:false,reason:'error'};
+    return data;  // {allowed,reason,current}
+  },
+  async saveReply(day,text){
+    const u=(await sb.auth.getUser()).data.user;
+    await sb.from('replies').insert({user_id:u.id,day,body:text});
+  }
+};
+const LocalStore = {
+  async opened(){try{return JSON.parse(localStorage.getItem('cal_opened')||'[]');}catch(e){return [];}},
+  async tryOpen(day){
+    const cur=currentUnlocked();
+    if(day<1||day>RT.total)return {allowed:false,reason:'range'};
+    if(day===RT.total&&cur<RT.total)return {allowed:false,reason:'finale'};
+    if(day>Math.max(cur,0)+RT.peek)return {allowed:false,reason:'cheat'};
+    const o=await this.opened();if(!o.includes(day)){o.push(day);try{localStorage.setItem('cal_opened',JSON.stringify(o));}catch(e){}}
+    return {allowed:true,reason:'ok',current:cur};
+  },
+  async saveReply(){/* demo: nothing persisted */}
+};
+let Store = LocalStore;
+
+/* =========================================================
+   AUTH (Supabase only)
+   ========================================================= */
+let mode='signup';
+function showGate(){document.getElementById('gate').classList.remove('hidden');document.getElementById('app').classList.add('hidden');}
+function setMode(m){
+  mode=m;
+  document.getElementById('fUser').classList.toggle('hidden',m==='login');
+  document.getElementById('gateBtn').textContent = m==='signup'?'Create my account 💕':'Log in 💕';
+  document.getElementById('gateSub').textContent = m==='signup'?'make your account to unlock your surprise':'welcome back 💕';
+  document.getElementById('gateSwitch').innerHTML = m==='signup'
+    ? 'already have an account? <a id="toLogin">log in</a>'
+    : 'new here? <a id="toLogin">create an account</a>';
+  document.getElementById('toLogin').onclick=()=>setMode(m==='signup'?'login':'signup');
+  document.getElementById('gateNote').textContent='';
+}
+async function doAuth(){
+  const note=document.getElementById('gateNote');note.className='gnote';
+  const email=document.getElementById('fEmail').value.trim();
+  const pass=document.getElementById('fPass').value;
+  const user=document.getElementById('fUser').value.trim();
+  if(!email||!pass||(mode==='signup'&&!user)){note.classList.add('err');note.textContent='fill everything in 🙂';return;}
+  document.getElementById('gateBtn').disabled=true;note.textContent='one sec… 💫';
+  try{
+    if(mode==='signup'){
+      const {error}=await sb.auth.signUp({email,password:pass,options:{data:{username:user}}});
+      if(error)throw error;
+      note.className='gnote ok';note.textContent='account created! logging you in… 💕';
+    }else{
+      const {error}=await sb.auth.signInWithPassword({email,password:pass});
+      if(error)throw error;
+    }
+    await afterAuth();
+  }catch(e){
+    note.className='gnote err';
+    note.textContent=(e&&e.message)?e.message:'something went wrong 😕';
+  }finally{document.getElementById('gateBtn').disabled=false;}
+}
+async function afterAuth(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){showGate();return;}
+  // load config + profile
+  const {data:cfg}=await sb.from('app_config').select('*').eq('id',1).single();
+  if(cfg){RT.start=parseDate(cfg.start_date);RT.total=cfg.total;RT.peek=cfg.peek_ahead;}
+  const {data:prof}=await sb.from('profiles').select('username').eq('id',session.user.id).single();
+  const name=(prof&&prof.username)||'you';
+  document.getElementById('hi').innerHTML=`hi ${name} 💕 &nbsp;·&nbsp; <a id="logout">log out</a>`;
+  document.getElementById('logout').onclick=async()=>{await sb.auth.signOut();location.reload();};
+  document.getElementById('gate').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  await build();
+}
+
+/* =========================================================
+   GRID
+   ========================================================= */
 function entryFor(n){
   return ENTRIES[n] || { category:"note", reason:`Reason #${n} you'll fall for me 😏`,
     body:"Still cooking this one up… 🍳 come back soon 💕" };
 }
-function build(){
-  const grid=document.getElementById('grid');const opened=getOpened();
-  for(let n=1;n<=CONFIG.total;n++){
-    const unlocked = n<=UNLOCKED;
-    const cat = (ENTRIES[n]&&ENTRIES[n].category)||(n===CONFIG.total?'finale':'note');
-    const t=document.createElement('button');
-    t.className='tile';
-    if(!unlocked){t.classList.add('locked');t.innerHTML=`<span class="ic">🔒</span><span class="num">${n}</span>`;}
-    else{
-      t.classList.add('open');
-      if(cat==='finale')t.classList.add('finale');
-      if(opened.includes(n))t.classList.add('opened');
-      else if(n===UNLOCKED && !PREVIEW)t.classList.add('fresh');     // newest unopened glows
-      const ic=(CATS[cat]||{e:'🎁'}).e;
-      t.innerHTML=`${opened.includes(n)?'<span class="done">✓</span>':''}<span class="ic">${ic}</span><span class="num">${n}</span>`;
+async function build(){
+  const grid=document.getElementById('grid');grid.innerHTML='';
+  const opened=await Store.opened();
+  const cur=currentUnlocked();
+  for(let n=1;n<=RT.total;n++){
+    const cat=(ENTRIES[n]&&ENTRIES[n].category)||(n===RT.total?'finale':'note');
+    const isOpened=opened.includes(n);
+    const unlocked=n<=cur;
+    const peekable=!unlocked && n<=Math.max(cur,0)+RT.peek && !(n===RT.total);
+    const t=document.createElement('button');t.className='tile';t.dataset.day=n;
+    if(isOpened){
+      t.classList.add('open');if(cat==='finale')t.classList.add('finale');t.classList.add('opened');
+      t.innerHTML=`<span class="done">✓</span><span class="ic">${(CATS[cat]||{e:'🎁'}).e}</span><span class="num">${n}</span>`;
+    }else if(unlocked){
+      t.classList.add('open');if(cat==='finale')t.classList.add('finale');
+      if(n===cur)t.classList.add('fresh');
+      t.innerHTML=`<span class="ic">${(CATS[cat]||{e:'🎁'}).e}</span><span class="num">${n}</span>`;
+    }else if(peekable){
+      t.classList.add('peek');t.innerHTML=`<span class="ic">👀</span><span class="num">${n}</span>`;
+    }else{
+      t.classList.add('locked');t.innerHTML=`<span class="ic">🔒</span><span class="num">${n}</span>`;
     }
-    t.addEventListener('click',()=>{
-      if(!unlocked){toast(`🔒 unlocks ${fmt(unlockDate(n))}`);return;}
-      openDay(n,t);
-    });
+    t.addEventListener('click',()=>openDay(n,t));
     grid.appendChild(t);
   }
-  const pct=Math.round(UNLOCKED/CONFIG.total*100);
+  const pct=Math.round(opened.length/RT.total*100);
   document.getElementById('bar').style.width=pct+'%';
   document.getElementById('pcount').textContent =
-    UNLOCKED<=0 ? `starts ${fmt(START)} 💌` : `Day ${UNLOCKED} / ${CONFIG.total}`;
+    cur<=0 ? `starts ${fmt(RT.start)} 💌` : `${opened.length} / ${RT.total} opened · day ${cur}`;
 }
 
-/* ---------- media embeds ---------- */
+/* ---------- media ---------- */
 function spotifyEmbed(url){
   let m=url.match(/spotify\.com\/(track|album|playlist|episode|show)\/([A-Za-z0-9]+)/)
         || url.match(/spotify:(track|album|playlist|episode|show):([A-Za-z0-9]+)/);
@@ -247,7 +370,15 @@ function youtubeEmbed(url){
 }
 
 /* ---------- open a day ---------- */
-function openDay(n,tile){
+async function openDay(n,tile){
+  const res=await Store.tryOpen(n);
+  if(!res.allowed){
+    if(res.reason==='cheat')toast(CHEATS[Math.floor(Math.random()*CHEATS.length)]);
+    else if(res.reason==='finale')toast('💍 patience… the finale only opens on day '+RT.total);
+    else if(res.reason==='auth')showGate();
+    else toast(`🔒 unlocks ${fmt(unlockDate(n))}`);
+    return;
+  }
   const e=entryFor(n);const cat=e.category||'note';const meta=CATS[cat]||{e:'🎁',l:'Surprise'};
   document.getElementById('daytag').textContent=`Day ${n} · ${fmt(unlockDate(n))}`;
   document.getElementById('catlabel').textContent=`${meta.e} ${meta.l}`;
@@ -267,32 +398,60 @@ function openDay(n,tile){
 
   document.getElementById('modal').classList.add('show');
   burst(cat==='finale'?90:40);
-  if(!getOpened().includes(n)){markOpened(n);if(tile){tile.classList.remove('fresh');tile.classList.add('opened');
-    if(!tile.querySelector('.done')){const d=document.createElement('span');d.className='done';d.textContent='✓';tile.prepend(d);}}}
+
+  // reflect opened state on the tile
+  if(tile){tile.className='tile open opened';if(cat==='finale')tile.classList.add('finale');
+    tile.innerHTML=`<span class="done">✓</span><span class="ic">${meta.e}</span><span class="num">${n}</span>`;}
+  // refresh progress count
+  const opened=await Store.opened();
+  document.getElementById('bar').style.width=Math.round(opened.length/RT.total*100)+'%';
+  const cur=currentUnlocked();
+  document.getElementById('pcount').textContent=cur<=0?`starts ${fmt(RT.start)} 💌`:`${opened.length} / ${RT.total} opened · day ${cur}`;
 }
 function closeModal(){document.getElementById('modal').classList.remove('show');}
 document.getElementById('close').addEventListener('click',closeModal);
 document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
-/* ---------- her reply -> your Telegram ---------- */
-function sendReply(n){
+/* ---------- her reply ---------- */
+async function sendReply(n){
   const txt=document.getElementById('replyText').value.trim();
   const note=document.getElementById('replyNote');
   if(!txt){note.textContent='write something first 🙂';return;}
-  if(!CONFIG.telegramToken||!CONFIG.telegramChatId){note.textContent='sent 💌';return;}
   note.textContent='sending… 💌';
-  fetch(`https://api.telegram.org/bot${CONFIG.telegramToken}/sendMessage`,{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({chat_id:CONFIG.telegramChatId,text:`💌 ${CONFIG.herName} answered Day ${n}:\n"${txt}"`,disable_web_page_preview:true})
-  }).then(r=>r.json()).then(d=>{note.textContent=d.ok?'sent 💌 he just got it':'sent 💌';})
-   .catch(()=>{note.textContent='sent 💌';});
+  try{ await Store.saveReply(n,txt); }catch(e){}
+  // optional instant Telegram ping
+  if(CONFIG.telegramToken&&CONFIG.telegramChatId){
+    fetch(`https://api.telegram.org/bot${CONFIG.telegramToken}/sendMessage`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:CONFIG.telegramChatId,text:`💌 ${CONFIG.herName} answered Day ${n}:\n"${txt}"`,disable_web_page_preview:true})
+    }).catch(()=>{});
+  }
+  note.textContent='sent 💌';
 }
 
-/* ---------- go ---------- */
-build();
-if(PREVIEW){const b=document.createElement('div');b.className='pvbanner';
-  b.textContent='👀 preview mode — all days unlocked (remove ?preview to go live)';document.body.appendChild(b);}
+/* =========================================================
+   INIT
+   ========================================================= */
+(async function init(){
+  if(SB_ON){
+    Store=SupaStore;
+    document.getElementById('toLogin').onclick=()=>setMode(mode==='signup'?'login':'signup');
+    document.getElementById('gateBtn').onclick=doAuth;
+    setMode('signup');
+    const {data:{session}}=await sb.auth.getSession();
+    if(session)await afterAuth(); else showGate();
+  }else{
+    // DEMO mode: no backend configured yet
+    RT.start=parseDate(CONFIG.startDate);RT.total=CONFIG.total;RT.peek=CONFIG.peekAhead;
+    document.getElementById('app').classList.remove('hidden');
+    document.getElementById('hi').textContent='demo mode 👀';
+    await build();
+    const b=document.createElement('div');b.className='demo-banner';
+    b.textContent='demo mode — add your Supabase keys in supabase-config.js to enable accounts & anti-cheat';
+    document.body.appendChild(b);
+  }
+})();
 </script>
 </body>
 </html>
