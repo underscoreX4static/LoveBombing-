@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Yumismi 💍</title>
+<title>Brooo 💍</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
@@ -188,9 +188,9 @@
 
       <!-- STEP 1 -->
       <section class="step active" id="step1">
-        <h1 class="logo">Yumismi<small>a tiny little question</small></h1>
+        <h1 class="logo">Brooo.<small>ok real question — be honest 👀</small></h1>
         <p class="question">Did you miss me? 🥺</p>
-        <p class="sub">Don't lie, the website will know 👀✨</p>
+        <p class="sub">don't lie, the website knows 👀✨</p>
         <div class="btns" id="btns1">
           <button class="btn btn-yes" data-next>Yes 💕</button>
           <button class="btn btn-no" data-no>No</button>
@@ -201,7 +201,7 @@
       <!-- STEP 2 -->
       <section class="step" id="step2">
         <div class="avatar"><span>💍</span></div>
-        <div class="bubble">OMG good news!! 🥹 So you changed your mind and you want to become my wife, my girl?? 💖👰</div>
+        <div class="bubble">Brooo wait— 🥹 good news?? So you changed your mind and you wanna be my wife?? 💍 (still my bro forever tho 🤝)</div>
         <div class="btns" id="btns2">
           <button class="btn btn-yes" data-next>Yes!! 💘</button>
           <button class="btn btn-no" data-no>No</button>
@@ -212,7 +212,7 @@
       <!-- STEP 3 -->
       <section class="step" id="step3">
         <h2 class="cal-title">Our last date 💕📆</h2>
-        <p class="cal-hint">Before I fly off for my 88 days. Every single slot is open — they're all reserved <b>for my wife</b> 💍</p>
+        <p class="cal-hint">One last date before I fly off for my 88 days, bro 🥹 Every slot is open — all reserved <b>for my wife</b> 💍</p>
         <div class="days" id="days"></div>
         <div class="slots" id="slots"></div>
         <div class="continue">
@@ -223,7 +223,7 @@
       <!-- STEP 4 -->
       <section class="step" id="step4">
         <div class="avatar"><span>💌</span></div>
-        <p class="final-line">It's a date! 🥰</p>
+        <p class="final-line">It's a date, bro 🥹💍</p>
         <div class="final-slot" id="finalSlot">—</div>
         <p class="sub" style="margin-top:16px">Tap below so I actually know when to show up looking cute 😎💐</p>
         <div class="send-row">
@@ -242,7 +242,7 @@
    CONFIG — the only thing you need to edit
    ========================================================= */
 const CONFIG = {
-  herName: "Yumi",
+  herName: "Shiho",
   recipientEmail: "Drice.mkd@gmail.com", // where the answer is sent. CHANGE if you want.
   recipientPhone: "",            // e.g. "61412345678" (country code, no +). Empty = hide WhatsApp button.
   daysAhead: 14,
@@ -308,7 +308,7 @@ function go(id){
 }
 
 /* ---------- runaway "No" (mouse + touch), Yes grows ---------- */
-const taunts=["No? 😏","Nice try 💅","Wrong button 😘","Can't catch me 🏃‍♀️💨","Nope 😌","You meant Yes 💕","Keep dreaming 😜","Stop it 🤭","Almost! …not 😂","The No is shy 🙈"];
+const taunts=["bro no 😭","nice try bro 💅","wrong button broo 😘","can't catch me 🏃‍♀️💨","nope bro 😌","you meant Yes 💕","keep dreaming broo 😜","stop it 🤭","almost! …not 😂","the No is shy 🙈"];
 function makeUncatchable(noBtn,tauntEl,yesBtn){
   let n=0;
   const flee=(e)=>{
@@ -402,10 +402,10 @@ document.getElementById('backCal').addEventListener('click',()=>go('step3'));
 /* ---------- output helpers ---------- */
 function prettySlot(){const d=state.dateObj;return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()} · ${state.time}`;}
 function persist(){try{localStorage.setItem('yumismi_answer',JSON.stringify({missedYou:true,wantsToBeWife:true,slot:prettySlot(),savedAt:new Date().toISOString()}));}catch(e){}}
-function buildMessage(){return `Yumismi 💌\nDid you miss me? → YES\nBecome my wife? → YES\nOur last date before the 88 days: ${prettySlot()}\n— ${CONFIG.herName} 💖`;}
+function buildMessage(){return `Brooo 💌\nDid you miss me? → YES\nWanna be my wife? → YES\nOur last date before the 88 days: ${prettySlot()}\n— ${CONFIG.herName} 💖`;}
 function prepareSend(){
   const msg=buildMessage();
-  const subject=encodeURIComponent('Yumismi 💍 — she said yes');
+  const subject=encodeURIComponent('Brooo 💍 — she said yes');
   const body=encodeURIComponent(msg);
   document.getElementById('sendMail').onclick=()=>{window.location.href=`mailto:${CONFIG.recipientEmail}?subject=${subject}&body=${body}`;};
   const wa=document.getElementById('sendWa');
