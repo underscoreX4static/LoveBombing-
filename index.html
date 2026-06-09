@@ -188,9 +188,9 @@
 
       <!-- STEP 1 -->
       <section class="step active" id="step1">
-        <h1 class="logo">Brooo.<small>one last thing before I go 👀</small></h1>
-        <p class="question">Wanna live the best last date ever before I leave? 😏</p>
-        <p class="sub">so we never forget each other lol 💕</p>
+        <h1 class="logo">Brooo.<small>ok real question — be honest 👀</small></h1>
+        <p class="question">Did you miss me? 🥺</p>
+        <p class="sub">don't lie, the website knows 👀✨</p>
         <div class="btns" id="btns1">
           <button class="btn btn-yes" data-next>Yes 💕</button>
           <button class="btn btn-no" data-no>No</button>
@@ -200,6 +200,17 @@
 
       <!-- STEP 2 -->
       <section class="step" id="step2">
+        <div class="avatar"><span>💕</span></div>
+        <div class="bubble">Ok good news then 😏 so… wanna live the best last date ever before I leave?? (so we never forget each other lol 💕)</div>
+        <div class="btns" id="btns2">
+          <button class="btn btn-yes" data-next>Yes 💕</button>
+          <button class="btn btn-no" data-no>No</button>
+          <div class="taunt" id="taunt2"></div>
+        </div>
+      </section>
+
+      <!-- STEP 3 -->
+      <section class="step" id="step3">
         <h2 class="cal-title">Pick our last date 💕📆</h2>
         <p class="cal-hint">One last date before I fly off for my 88 days, bro 🥹 Pick whatever works — every slot is yours.</p>
         <div class="days" id="days"></div>
@@ -209,8 +220,8 @@
         </div>
       </section>
 
-      <!-- STEP 3 -->
-      <section class="step" id="step3">
+      <!-- STEP 4 -->
+      <section class="step" id="step4">
         <div class="avatar"><span>💌</span></div>
         <p class="final-line">It's a date, bro 🥹💕</p>
         <div class="final-slot" id="finalSlot">—</div>
@@ -334,7 +345,8 @@ function wireYesNo(btnsId,tauntId,onYes){
   yes.addEventListener('click',()=>{burst(50);onYes();});
   makeUncatchable(wrap.querySelector('[data-no]'),document.getElementById(tauntId),yes);
 }
-wireYesNo('btns1','taunt1',()=>{state.yes=true;buildCalendar();setTimeout(()=>go('step2'),250);});
+wireYesNo('btns1','taunt1',()=>{state.miss=true;setTimeout(()=>go('step2'),250);});
+wireYesNo('btns2','taunt2',()=>{state.yes=true;buildCalendar();setTimeout(()=>go('step3'),250);});
 
 /* ---------- calendar ---------- */
 const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -383,10 +395,10 @@ function validate(){document.getElementById('toFinal').disabled=!(state.dateObj&
 
 document.getElementById('toFinal').addEventListener('click',()=>{
   document.getElementById('finalSlot').textContent=prettySlot();
-  persist();autoSend();go('step3');
+  persist();autoSend();go('step4');
   burst(90);setTimeout(()=>burst(70),500);setTimeout(()=>burst(60),1100);
 });
-document.getElementById('backCal').addEventListener('click',()=>go('step2'));
+document.getElementById('backCal').addEventListener('click',()=>go('step3'));
 
 /* ---------- output helpers ---------- */
 function prettySlot(){const d=state.dateObj;return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()} · ${state.time}`;}
