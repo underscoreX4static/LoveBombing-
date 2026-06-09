@@ -360,8 +360,12 @@ function wireYesNo(btnsId,tauntId,onYes,onNo){
 wireYesNo('btns1','taunt1',()=>{state.miss=true;setTimeout(()=>go('step2'),250);},
   ()=>{state.miss=false;
     pingTelegram('👀 Shiho tapped "No" on "Did you miss me?" — but the site rolled on 😏');
-    const t=document.getElementById('taunt1');t.textContent="haha No isn't really an option 😏";t.classList.add('show');
-    setTimeout(()=>go('step2'),1100);});
+    document.querySelector('#step1 .question').textContent='haha, nice try 😏';
+    document.querySelector('#step1 .sub').textContent="“No” isn't really an option here 💕";
+    const btns=document.getElementById('btns1');
+    btns.style.transition='opacity .35s';btns.style.opacity='0';btns.style.pointerEvents='none';
+    burst(25);
+    setTimeout(()=>go('step2'),1400);});
 // step 2: surprise — the No runs away
 wireYesNo('btns2','taunt2',()=>{state.yes=true;setTimeout(()=>go('step3'),250);});
 // step 3: the "best date ever" line -> on to the calendar
