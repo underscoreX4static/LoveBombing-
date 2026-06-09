@@ -212,9 +212,11 @@
       <!-- STEP 2 (No path) -->
       <section class="step" id="step2no">
         <div class="avatar"><span>😌</span></div>
-        <div class="bubble">Oh so you didn't change your mind… still don't wanna become my girl?? 😏 Fine fine — then let's at least have the best last date ever, so we can never forget each other 💕</div>
-        <div class="continue">
-          <button class="btn btn-yes btn-wide" id="toCalNo">Deal 🤝</button>
+        <div class="bubble">Oh so you didn't change your mind… still don't wanna become my girl?? 😏 Fine — but you're NOT escaping the best last date ever, so we never forget each other 💕</div>
+        <div class="btns" id="btns2no">
+          <button class="btn btn-yes" data-next>Deal 🤝</button>
+          <button class="btn btn-no" data-no>No</button>
+          <div class="taunt" id="taunt2no"></div>
         </div>
       </section>
 
@@ -372,11 +374,12 @@ wireYesNo('btns1','taunt1',
   ()=>{state.miss=false;burst(20);
     pingTelegram('👀 Shiho tapped "No" on "Did you miss me?" — sent her to the no-path 😏');
     setTimeout(()=>go('step2no'),250);});
-// step 2: surprise — the No runs away
+// step 2 (Yes path): No runs away -> step 3
 wireYesNo('btns2','taunt2',()=>{state.yes=true;setTimeout(()=>go('step3'),250);});
-// "best date ever" / "deal" -> on to the calendar (both paths)
+// step 2 (No path): No also runs away -> straight to the calendar
+wireYesNo('btns2no','taunt2no',()=>{buildCalendar();setTimeout(()=>go('step4'),250);});
+// step 3 "best date ever" -> calendar
 document.getElementById('toCal').addEventListener('click',()=>{burst(40);buildCalendar();go('step4');});
-document.getElementById('toCalNo').addEventListener('click',()=>{burst(40);buildCalendar();go('step4');});
 
 /* ---------- calendar ---------- */
 const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
