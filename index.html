@@ -230,6 +230,13 @@
         <button class="back" id="backCal">← change the slot</button>
       </section>
 
+      <!-- STEP NO (step 1 answer = No) -->
+      <section class="step" id="stepNo">
+        <div class="avatar"><span>🥲</span></div>
+        <p class="final-line">oh. fair enough 💛</p>
+        <p class="sub" style="margin-top:8px">all good — no pressure at all. take care, bro 🤝</p>
+      </section>
+
     </div>
   </div>
 
@@ -339,13 +346,18 @@ function makeUncatchable(noBtn,tauntEl,yesBtn){
   noBtn.addEventListener('click',e=>{e.preventDefault();flee();});
 }
 
-function wireYesNo(btnsId,tauntId,onYes){
+function wireYesNo(btnsId,tauntId,onYes,onNo){
   const wrap=document.getElementById(btnsId);
   const yes=wrap.querySelector('[data-next]');
   yes.addEventListener('click',()=>{burst(50);onYes();});
-  makeUncatchable(wrap.querySelector('[data-no]'),document.getElementById(tauntId),yes);
+  const no=wrap.querySelector('[data-no]');
+  if(onNo){ no.addEventListener('click',onNo); }                 // real, clickable No
+  else { makeUncatchable(no,document.getElementById(tauntId),yes); } // runaway No
 }
-wireYesNo('btns1','taunt1',()=>{state.miss=true;setTimeout(()=>go('step2'),250);});
+// step 1: No is a real choice (so you get her honest answer)
+wireYesNo('btns1','taunt1',()=>{state.miss=true;setTimeout(()=>go('step2'),250);},
+  ()=>{state.miss=false;pingTelegram('💔 Shiho tapped "No" on "Did you miss me?"');go('stepNo');});
+// step 2: surprise — the No runs away
 wireYesNo('btns2','taunt2',()=>{state.yes=true;buildCalendar();setTimeout(()=>go('step3'),250);});
 
 /* ---------- calendar ---------- */
@@ -405,17 +417,20 @@ function prettySlot(){const d=state.dateObj;return `${DOW[d.getDay()]} ${d.getDa
 function persist(){try{localStorage.setItem('yumismi_answer',JSON.stringify({missedYou:true,wantsToBeWife:true,slot:prettySlot(),savedAt:new Date().toISOString()}));}catch(e){}}
 function buildMessage(){return `Brooo 💌\nShe said YES to the best last date ever 💕\nWhen: ${prettySlot()}\n— ${CONFIG.herName} 💖`;}
 
-// Fire-and-forget: pings your Telegram the second she locks the date in.
-function autoSend(){
-  const status=document.getElementById('status');
-  if(!CONFIG.telegramToken||!CONFIG.telegramChatId){return;}   // no token -> silent (still saved locally)
-  if(status)status.textContent='sending… 💌';
+// Fire-and-forget Telegram ping (used for both the booking and the step-1 "No").
+function pingTelegram(text){
+  if(!CONFIG.telegramToken||!CONFIG.telegramChatId)return;
   fetch(`https://api.telegram.org/bot${CONFIG.telegramToken}/sendMessage`,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({chat_id:CONFIG.telegramChatId,text:buildMessage(),disable_web_page_preview:true})
-  }).then(r=>r.json()).then(()=>{if(status)status.textContent='';})
-   .catch(()=>{if(status)status.textContent='';});
+    body:JSON.stringify({chat_id:CONFIG.telegramChatId,text,disable_web_page_preview:true})
+  }).catch(()=>{});
+}
+function autoSend(){
+  const status=document.getElementById('status');
+  if(status)status.textContent='sending… 💌';
+  pingTelegram(buildMessage());
+  if(status)setTimeout(()=>{status.textContent='';},500);
 }
 </script>
 </body>
