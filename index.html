@@ -200,8 +200,8 @@
 
       <!-- STEP 2 -->
       <section class="step" id="step2">
-        <div class="avatar"><span>💕</span></div>
-        <div class="bubble">Ooh so you changed your mind and you wanna become my girl?? 😏 Niiiice — let's have the best last date ever so we make sure we can't forget each other lol 💕</div>
+        <div class="avatar"><span>😏</span></div>
+        <div class="bubble">Ooh so you changed your mind and you wanna become my girl?? 😏</div>
         <div class="btns" id="btns2">
           <button class="btn btn-yes" data-next>Yes 💕</button>
           <button class="btn btn-no" data-no>No</button>
@@ -211,6 +211,15 @@
 
       <!-- STEP 3 -->
       <section class="step" id="step3">
+        <div class="avatar"><span>💕</span></div>
+        <div class="bubble">Niiiice 😎 let's have the best date ever — so we can never forget each other 💕</div>
+        <div class="continue">
+          <button class="btn btn-yes btn-wide" id="toCal">Let's go 👉</button>
+        </div>
+      </section>
+
+      <!-- STEP 4 -->
+      <section class="step" id="step4">
         <h2 class="cal-title">Pick our last date 💕📆</h2>
         <p class="cal-hint">One last date before I fly off for my 88 days, bro 🥹 Pick whatever works — every slot is yours.</p>
         <div class="days" id="days"></div>
@@ -220,8 +229,8 @@
         </div>
       </section>
 
-      <!-- STEP 4 -->
-      <section class="step" id="step4">
+      <!-- STEP 5 -->
+      <section class="step" id="step5">
         <div class="avatar"><span>💌</span></div>
         <p class="final-line">It's a date, bro 🥹💕</p>
         <div class="final-slot" id="finalSlot">—</div>
@@ -358,7 +367,9 @@ function wireYesNo(btnsId,tauntId,onYes,onNo){
 wireYesNo('btns1','taunt1',()=>{state.miss=true;setTimeout(()=>go('step2'),250);},
   ()=>{state.miss=false;pingTelegram('💔 Shiho tapped "No" on "Did you miss me?"');go('stepNo');});
 // step 2: surprise — the No runs away
-wireYesNo('btns2','taunt2',()=>{state.yes=true;buildCalendar();setTimeout(()=>go('step3'),250);});
+wireYesNo('btns2','taunt2',()=>{state.yes=true;setTimeout(()=>go('step3'),250);});
+// step 3: the "best date ever" line -> on to the calendar
+document.getElementById('toCal').addEventListener('click',()=>{burst(40);buildCalendar();go('step4');});
 
 /* ---------- calendar ---------- */
 const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -407,10 +418,10 @@ function validate(){document.getElementById('toFinal').disabled=!(state.dateObj&
 
 document.getElementById('toFinal').addEventListener('click',()=>{
   document.getElementById('finalSlot').textContent=prettySlot();
-  persist();autoSend();go('step4');
+  persist();autoSend();go('step5');
   burst(90);setTimeout(()=>burst(70),500);setTimeout(()=>burst(60),1100);
 });
-document.getElementById('backCal').addEventListener('click',()=>go('step3'));
+document.getElementById('backCal').addEventListener('click',()=>go('step4'));
 
 /* ---------- output helpers ---------- */
 function prettySlot(){const d=state.dateObj;return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()} · ${state.time}`;}
