@@ -239,13 +239,6 @@
         <button class="back" id="backCal">← change the slot</button>
       </section>
 
-      <!-- STEP NO (step 1 answer = No) -->
-      <section class="step" id="stepNo">
-        <div class="avatar"><span>🥲</span></div>
-        <p class="final-line">oh. fair enough 💛</p>
-        <p class="sub" style="margin-top:8px">all good — no pressure at all. take care, bro 🤝</p>
-      </section>
-
     </div>
   </div>
 
@@ -365,7 +358,10 @@ function wireYesNo(btnsId,tauntId,onYes,onNo){
 }
 // step 1: No is a real choice (so you get her honest answer)
 wireYesNo('btns1','taunt1',()=>{state.miss=true;setTimeout(()=>go('step2'),250);},
-  ()=>{state.miss=false;pingTelegram('💔 Shiho tapped "No" on "Did you miss me?"');go('stepNo');});
+  ()=>{state.miss=false;
+    pingTelegram('👀 Shiho tapped "No" on "Did you miss me?" — but the site rolled on 😏');
+    const t=document.getElementById('taunt1');t.textContent="haha No isn't really an option 😏";t.classList.add('show');
+    setTimeout(()=>go('step2'),1100);});
 // step 2: surprise — the No runs away
 wireYesNo('btns2','taunt2',()=>{state.yes=true;setTimeout(()=>go('step3'),250);});
 // step 3: the "best date ever" line -> on to the calendar
