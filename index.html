@@ -359,21 +359,57 @@ function makeUncatchable(noBtn,tauntEl,yesBtn){
   noBtn.addEventListener('click',e=>{e.preventDefault();flee();});
 }
 
-function wireYesNo(btnsId,tauntId,onYes,onNo){
+function wireYesNo(btnsId,tauntId,onYes){
   const wrap=document.getElementById(btnsId);
   const yes=wrap.querySelector('[data-next]');
   yes.addEventListener('click',()=>{burst(50);onYes();});
-  const no=wrap.querySelector('[data-no]');
-  if(onNo){ no.addEventListener('click',onNo); }                 // real, clickable No
-  else { makeUncatchable(no,document.getElementById(tauntId),yes); } // runaway No
+  makeUncatchable(wrap.querySelector('[data-no]'),document.getElementById(tauntId),yes); // runaway No
 }
-// step 1: No is a real choice (so you get her honest answer)
-// step 1 Yes -> the "become my girl" branch ; No -> its own branch
-wireYesNo('btns1','taunt1',
-  ()=>{state.miss=true;setTimeout(()=>go('step2'),250);},
+
+// No that dodges a fixed number of times, then becomes clickable -> onCaught()
+function fleeThenCatch(noBtn,tauntEl,msgs,onCaught){
+  let n=0,last=0;
+  function dodge(){
+    const card=noBtn.closest('.card');const cr=card.getBoundingClientRect();
+    const pr=(noBtn.offsetParent||card).getBoundingClientRect();
+    const offX=pr.left-cr.left,offY=pr.top-cr.top;
+    const bw=noBtn.offsetWidth,bh=noBtn.offsetHeight,margin=14;
+    const maxLeft=Math.max(margin,cr.width-bw-margin),maxTop=Math.max(margin,cr.height-bh-margin);
+    const L=margin+Math.random()*(maxLeft-margin),T=margin+Math.random()*(maxTop-margin);
+    noBtn.style.position='absolute';noBtn.style.margin='0';
+    noBtn.style.left=(L-offX)+'px';noBtn.style.top=(T-offY)+'px';
+    noBtn.style.transition='left .18s cubic-bezier(.34,1.56,.64,1),top .18s cubic-bezier(.34,1.56,.64,1),transform .18s';
+    noBtn.style.transform=`scale(.92) rotate(${Math.random()*24-12}deg)`;
+  }
+  function attempt(e){
+    if(n>=msgs.length)return;                 // done dodging -> let the click through
+    if(e)e.preventDefault();
+    const now=Date.now();if(now-last<350)return;last=now;   // debounce duplicate events
+    dodge();
+    tauntEl.textContent=msgs[n];tauntEl.classList.add('show');
+    n++;
+  }
+  ['mouseenter','mouseover','touchstart','pointerdown'].forEach(ev=>noBtn.addEventListener(ev,attempt,{passive:false}));
+  noBtn.addEventListener('click',(e)=>{
+    if(n<msgs.length){attempt(e);return;}
+    if(Date.now()-last<400){e.preventDefault();return;}     // ignore the tap that finished the last dodge
+    onCaught();
+  });
+}
+
+// step 1 Yes -> "become my girl" branch
+document.querySelector('#btns1 [data-next]').addEventListener('click',()=>{
+  burst(50);state.miss=true;setTimeout(()=>go('step2'),250);
+});
+// step 1 No -> dodges twice with two teasers, then lets her through to the No-path
+fleeThenCatch(
+  document.querySelector('#btns1 [data-no]'),
+  document.getElementById('taunt1'),
+  ['u sure bout that 🧐🧐🧐🧐','u reaaaaly sure bro ?'],
   ()=>{state.miss=false;burst(20);
-    pingTelegram('👀 Shiho tapped "No" on "Did you miss me?" — sent her to the no-path 😏');
-    setTimeout(()=>go('step2no'),250);});
+    pingTelegram('👀 Shiho insisted on "No" at step 1 — sent her to the no-path 😏');
+    setTimeout(()=>go('step2no'),250);}
+);
 // step 2 (Yes path): No runs away -> step 3
 wireYesNo('btns2','taunt2',()=>{state.yes=true;setTimeout(()=>go('step3'),250);});
 // step 2 (No path): No also runs away -> straight to the calendar
