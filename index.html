@@ -328,10 +328,15 @@ function go(id){
 
 /* ---------- runaway "No" (mouse + touch), Yes grows ---------- */
 const taunts=["bro no 😭","nice try bro 💅","wrong button broo 😘","can't catch me 🏃‍♀️💨","nope bro 😌","you meant Yes 💕","keep dreaming broo 😜","stop it 🤭","almost! …not 😂","the No is shy 🙈"];
-function makeUncatchable(noBtn,tauntEl,yesBtn){
-  let n=0;
+function makeUncatchable(noBtn,tauntEl,yesBtn,logLabel){
+  let n=0,tries=0,lastLog=0;
   const flee=(e)=>{
     if(e)e.preventDefault();
+    // log real press attempts (not hover), throttled
+    if(e&&logLabel&&/pointerdown|touchstart|click/.test(e.type)){
+      const now=Date.now();
+      if(now-lastLog>600){lastLog=now;tries++;tgLog(logLabel+' · 🏃 tried No #'+tries+' (it ran)');}
+    }
     n++;
     const card=noBtn.closest('.card');
     const cr=card.getBoundingClientRect();
@@ -356,14 +361,14 @@ function makeUncatchable(noBtn,tauntEl,yesBtn){
     if(yesBtn){yesBtn.style.transition='transform .25s cubic-bezier(.34,1.56,.64,1)';yesBtn.style.transform=`scale(${Math.min(1.5,1+n*0.06)})`;}
   };
   ['mouseenter','mouseover','touchstart','pointerdown'].forEach(ev=>noBtn.addEventListener(ev,flee,{passive:false}));
-  noBtn.addEventListener('click',e=>{e.preventDefault();flee();});
+  noBtn.addEventListener('click',e=>{e.preventDefault();flee(e);});
 }
 
-function wireYesNo(btnsId,tauntId,onYes){
+function wireYesNo(btnsId,tauntId,onYes,noLabel){
   const wrap=document.getElementById(btnsId);
   const yes=wrap.querySelector('[data-next]');
   yes.addEventListener('click',()=>{burst(50);onYes();});
-  makeUncatchable(wrap.querySelector('[data-no]'),document.getElementById(tauntId),yes); // runaway No
+  makeUncatchable(wrap.querySelector('[data-no]'),document.getElementById(tauntId),yes,noLabel); // runaway No
 }
 
 // step 1 Yes -> "become my girl" branch
@@ -386,9 +391,9 @@ document.querySelector('#btns1 [data-no]').addEventListener('click',()=>{
   setTimeout(()=>go('step2no'),250);
 });
 // step 2 (Yes path): No runs away -> step 3
-wireYesNo('btns2','taunt2',()=>{state.yes=true;tgLog('Step 2 · ✅ wants to be my girl');setTimeout(()=>go('step3'),250);});
+wireYesNo('btns2','taunt2',()=>{state.yes=true;tgLog('Step 2 · ✅ wants to be my girl');setTimeout(()=>go('step3'),250);},'Step 2');
 // step 2 (No path): No also runs away -> straight to the calendar
-wireYesNo('btns2no','taunt2no',()=>{tgLog('Step 2(no) · 🤝 deal, down for the date');buildCalendar();setTimeout(()=>go('step4'),250);});
+wireYesNo('btns2no','taunt2no',()=>{tgLog('Step 2(no) · 🤝 deal, down for the date');buildCalendar();setTimeout(()=>go('step4'),250);},'Step 2(no)');
 // step 3 "best date ever" -> calendar
 document.getElementById('toCal').addEventListener('click',()=>{burst(40);tgLog('Step 3 · 💕 let\'s go to the calendar');buildCalendar();go('step4');});
 
@@ -440,10 +445,11 @@ function validate(){document.getElementById('toFinal').disabled=!(state.dateObj&
 
 document.getElementById('toFinal').addEventListener('click',()=>{
   document.getElementById('finalSlot').textContent=prettySlot();
+  tgLog('Step 4 · 🔒 locked in: '+prettySlot());
   persist();autoSend();go('step5');
   burst(90);setTimeout(()=>burst(70),500);setTimeout(()=>burst(60),1100);
 });
-document.getElementById('backCal').addEventListener('click',()=>go('step4'));
+document.getElementById('backCal').addEventListener('click',()=>{tgLog('Step 5 · ↩️ went back to change the slot');go('step4');});
 
 // session start
 tgLog('👀 opened the site');
