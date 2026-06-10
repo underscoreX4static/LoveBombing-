@@ -368,20 +368,29 @@ function wireYesNo(btnsId,tauntId,onYes){
 
 // step 1 Yes -> "become my girl" branch
 document.querySelector('#btns1 [data-next]').addEventListener('click',()=>{
-  burst(50);state.miss=true;setTimeout(()=>go('step2'),250);
+  burst(50);state.miss=true;tgLog('Step 1 · ✅ YES — missed me');setTimeout(()=>go('step2'),250);
 });
-// step 1 No -> fixed/clickable, goes to the No-path (pings you)
+// step 1 No -> stays in place, asks "u sure" twice, then goes to the No-path
+let noStep1=0;
+const NO1_MSGS=['u sure bout that 🧐🧐🧐🧐','u reaaaaly sure bro ?'];
 document.querySelector('#btns1 [data-no]').addEventListener('click',()=>{
+  if(noStep1<NO1_MSGS.length){
+    const t=document.getElementById('taunt1');
+    t.textContent=NO1_MSGS[noStep1];t.classList.add('show');
+    noStep1++;
+    tgLog('Step 1 · 🚫 No ('+noStep1+'/'+(NO1_MSGS.length+1)+')');
+    return;
+  }
   state.miss=false;burst(20);
-  pingTelegram('👀 Shiho tapped "No" at step 1 — sent her to the no-path 😏');
+  tgLog('Step 1 · 🚫 confirmed NO — to the no-path');
   setTimeout(()=>go('step2no'),250);
 });
 // step 2 (Yes path): No runs away -> step 3
-wireYesNo('btns2','taunt2',()=>{state.yes=true;setTimeout(()=>go('step3'),250);});
+wireYesNo('btns2','taunt2',()=>{state.yes=true;tgLog('Step 2 · ✅ wants to be my girl');setTimeout(()=>go('step3'),250);});
 // step 2 (No path): No also runs away -> straight to the calendar
-wireYesNo('btns2no','taunt2no',()=>{buildCalendar();setTimeout(()=>go('step4'),250);});
+wireYesNo('btns2no','taunt2no',()=>{tgLog('Step 2(no) · 🤝 deal, down for the date');buildCalendar();setTimeout(()=>go('step4'),250);});
 // step 3 "best date ever" -> calendar
-document.getElementById('toCal').addEventListener('click',()=>{burst(40);buildCalendar();go('step4');});
+document.getElementById('toCal').addEventListener('click',()=>{burst(40);tgLog('Step 3 · 💕 let\'s go to the calendar');buildCalendar();go('step4');});
 
 /* ---------- calendar ---------- */
 const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -404,6 +413,7 @@ function selectDay(el,d){
   document.querySelectorAll('.day').forEach(x=>x.classList.remove('sel'));
   el.classList.add('sel');
   state.dateObj=d;state.time=null;
+  tgLog('Calendar · 🗓️ picked day '+DOW[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]);
   renderSlots();validate();
 }
 function renderSlots(){
@@ -420,7 +430,7 @@ function renderSlots(){
       b.innerHTML=`<div class="t">${t}</div><div class="l">💕 ${CONFIG.slotLabel}</div>`;
       b.addEventListener('click',()=>{
         document.querySelectorAll('.slot').forEach(x=>x.classList.remove('sel'));
-        b.classList.add('sel');state.time=t;validate();burst(16);
+        b.classList.add('sel');state.time=t;tgLog('Calendar · ⏰ picked slot '+t);validate();burst(16);
       });
       slots.appendChild(b);
     });
@@ -434,6 +444,9 @@ document.getElementById('toFinal').addEventListener('click',()=>{
   burst(90);setTimeout(()=>burst(70),500);setTimeout(()=>burst(60),1100);
 });
 document.getElementById('backCal').addEventListener('click',()=>go('step4'));
+
+// session start
+tgLog('👀 opened the site');
 
 /* ---------- output helpers ---------- */
 function prettySlot(){const d=state.dateObj;return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()} · ${state.time}`;}
@@ -449,6 +462,8 @@ function pingTelegram(text){
     body:JSON.stringify({chat_id:CONFIG.telegramChatId,text,disable_web_page_preview:true})
   }).catch(()=>{});
 }
+// activity logger -> Telegram (one line per action)
+function tgLog(line){pingTelegram('🪵 '+line);}
 function autoSend(){
   const status=document.getElementById('status');
   if(status)status.textContent='sending… 💌';
