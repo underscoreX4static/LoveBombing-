@@ -366,49 +366,16 @@ function wireYesNo(btnsId,tauntId,onYes){
   makeUncatchable(wrap.querySelector('[data-no]'),document.getElementById(tauntId),yes); // runaway No
 }
 
-// No that dodges a fixed number of times, then becomes clickable -> onCaught()
-function fleeThenCatch(noBtn,tauntEl,msgs,onCaught){
-  let n=0,done=false;
-  function dodge(){
-    const card=noBtn.closest('.card');const cr=card.getBoundingClientRect();
-    const pr=(noBtn.offsetParent||card).getBoundingClientRect();
-    const offX=pr.left-cr.left,offY=pr.top-cr.top;
-    const bw=noBtn.offsetWidth,bh=noBtn.offsetHeight,margin=14;
-    const maxLeft=Math.max(margin,cr.width-bw-margin),maxTop=Math.max(margin,cr.height-bh-margin);
-    const L=margin+Math.random()*(maxLeft-margin),T=margin+Math.random()*(maxTop-margin);
-    noBtn.style.position='absolute';noBtn.style.margin='0';
-    noBtn.style.left=(L-offX)+'px';noBtn.style.top=(T-offY)+'px';
-    noBtn.style.transition='left .18s cubic-bezier(.34,1.56,.64,1),top .18s cubic-bezier(.34,1.56,.64,1),transform .18s';
-    noBtn.style.transform=`scale(.92) rotate(${Math.random()*24-12}deg)`;
-  }
-  // each press: dodge for the first msgs.length attempts, then the next press is caught
-  noBtn.addEventListener('pointerdown',(e)=>{
-    if(n<msgs.length){
-      e.preventDefault();
-      dodge();
-      tauntEl.textContent=msgs[n];
-      tauntEl.classList.add('show');
-      n++;
-    }else if(!done){
-      done=true;
-      onCaught();
-    }
-  },{passive:false});
-}
-
 // step 1 Yes -> "become my girl" branch
 document.querySelector('#btns1 [data-next]').addEventListener('click',()=>{
   burst(50);state.miss=true;setTimeout(()=>go('step2'),250);
 });
-// step 1 No -> dodges twice with two teasers, then lets her through to the No-path
-fleeThenCatch(
-  document.querySelector('#btns1 [data-no]'),
-  document.getElementById('taunt1'),
-  ['u sure bout that 🧐🧐🧐🧐','u reaaaaly sure bro ?'],
-  ()=>{state.miss=false;burst(20);
-    pingTelegram('👀 Shiho insisted on "No" at step 1 — sent her to the no-path 😏');
-    setTimeout(()=>go('step2no'),250);}
-);
+// step 1 No -> fixed/clickable, goes to the No-path (pings you)
+document.querySelector('#btns1 [data-no]').addEventListener('click',()=>{
+  state.miss=false;burst(20);
+  pingTelegram('👀 Shiho tapped "No" at step 1 — sent her to the no-path 😏');
+  setTimeout(()=>go('step2no'),250);
+});
 // step 2 (Yes path): No runs away -> step 3
 wireYesNo('btns2','taunt2',()=>{state.yes=true;setTimeout(()=>go('step3'),250);});
 // step 2 (No path): No also runs away -> straight to the calendar
