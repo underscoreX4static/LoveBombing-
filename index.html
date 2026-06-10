@@ -368,7 +368,7 @@ function wireYesNo(btnsId,tauntId,onYes){
 
 // No that dodges a fixed number of times, then becomes clickable -> onCaught()
 function fleeThenCatch(noBtn,tauntEl,msgs,onCaught){
-  let n=0,last=0;
+  let n=0,done=false;
   function dodge(){
     const card=noBtn.closest('.card');const cr=card.getBoundingClientRect();
     const pr=(noBtn.offsetParent||card).getBoundingClientRect();
@@ -381,20 +381,19 @@ function fleeThenCatch(noBtn,tauntEl,msgs,onCaught){
     noBtn.style.transition='left .18s cubic-bezier(.34,1.56,.64,1),top .18s cubic-bezier(.34,1.56,.64,1),transform .18s';
     noBtn.style.transform=`scale(.92) rotate(${Math.random()*24-12}deg)`;
   }
-  function attempt(e){
-    if(n>=msgs.length)return;                 // done dodging -> let the click through
-    if(e)e.preventDefault();
-    const now=Date.now();if(now-last<350)return;last=now;   // debounce duplicate events
-    dodge();
-    tauntEl.textContent=msgs[n];tauntEl.classList.add('show');
-    n++;
-  }
-  ['mouseenter','mouseover','touchstart','pointerdown'].forEach(ev=>noBtn.addEventListener(ev,attempt,{passive:false}));
-  noBtn.addEventListener('click',(e)=>{
-    if(n<msgs.length){attempt(e);return;}
-    if(Date.now()-last<400){e.preventDefault();return;}     // ignore the tap that finished the last dodge
-    onCaught();
-  });
+  // each press: dodge for the first msgs.length attempts, then the next press is caught
+  noBtn.addEventListener('pointerdown',(e)=>{
+    if(n<msgs.length){
+      e.preventDefault();
+      dodge();
+      tauntEl.textContent=msgs[n];
+      tauntEl.classList.add('show');
+      n++;
+    }else if(!done){
+      done=true;
+      onCaught();
+    }
+  },{passive:false});
 }
 
 // step 1 Yes -> "become my girl" branch
